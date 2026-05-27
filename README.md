@@ -75,3 +75,7 @@ You can see the following resources to learn more about your solution and the AB
 
 * [Web Application Development Tutorial](https://abp.io/docs/latest/tutorials/book-store/part-1)
 * [Application Startup Template](https://abp.io/docs/latest/startup-templates/application/index)
+
+### Document: 
+https://docs.google.com/document/d/1Aq8-HZ6Cod-Wq7IcMACCiAFRDCXuZsD8JH398y8-h2o/edit?tab=t.0
+The current version is still at a basic stage, mainly demonstrating how to apply the ABP framework with Angular. It is not yet a fully featured Human Resource Management application. Most components and features are currently designed primarily for administrators and HR staff.
