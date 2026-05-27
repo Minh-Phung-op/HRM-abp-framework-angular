@@ -1,0 +1,13 @@
+/* Tùy chỉnh màu dòng lẻ (trắng) và dòng chẵn (đục) */
+.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+    background: #f8fafc !important; /* Màu xám nhạt (đục) cho dòng chẵn */
+}
+
+.p-datatable-striped .p-datatable-tbody > tr:nth-child(odd) {
+    background: #ffffff !important; /* Màu trắng cho dòng lẻ */
+}
+
+/* Hiệu ứng khi di chuột qua */
+.p-datatable-tbody > tr:hover {
+    background: #eff6ff !important; /* Màu xanh nhạt khi hover */
+}

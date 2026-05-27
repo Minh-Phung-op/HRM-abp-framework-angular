@@ -1,0 +1,100 @@
+<p-toast position="top-right" />
+
+<div class="panel">
+
+    <!-- Panel header -->
+    <div class="panel__header">
+        <div class="panel__emp">
+            <span class="panel__emp-name">{{ payroll.employeeName }}</span>
+            <span class="panel__emp-meta">{{ payroll.employeeCode }} · {{ payroll.positionTitle }}</span>
+        </div>
+        <div class="panel__header-actions">
+            <p-button icon="pi pi-file-pdf" [text]="true" severity="secondary" pTooltip="Xem phiếu lương"
+                (onClick)="previewPayslip.emit(payroll)" />
+            <p-button icon="pi pi-times" [text]="true" severity="secondary" pTooltip="Đóng" (onClick)="close.emit()" />
+        </div>
+    </div>
+
+    <!-- Salary summary -->
+    <div class="salary-summary">
+        <div class="salary-row salary-row--highlight">
+            <span>Thực nhận (Net)</span>
+            <strong class="salary-net">{{ fmt(payroll.netSalary) }}</strong>
+        </div>
+        <div class="salary-row">
+            <span>Gross</span>
+            <span>{{ fmt(payroll.grossSalary) }}</span>
+        </div>
+        <div class="salary-row">
+            <span>Tổng khấu trừ</span>
+            <span class="text-red">{{ fmt(payroll.totalDeduction) }}</span>
+        </div>
+    </div>
+
+    <p-divider styleClass="my-0" />
+
+    <!-- Insurance & Tax breakdown -->
+    <div class="breakdown-section">
+        <h4 class="section-title">Bảo hiểm & Thuế</h4>
+        <div class="breakdown-grid">
+            <div class="breakdown-item">
+                <span class="breakdown-label">BHXH (NLĐ)</span>
+                <span class="breakdown-value">{{ fmt(payroll.bhxhEmployee) }}</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">BHYT (NLĐ)</span>
+                <span class="breakdown-value">{{ fmt(payroll.bhytEmployee) }}</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">BHTN (NLĐ)</span>
+                <span class="breakdown-value">{{ fmt(payroll.bhtnEmployee) }}</span>
+            </div>
+            <div class="breakdown-item">
+                <span class="breakdown-label">Thuế TNCN</span>
+                <span class="breakdown-value text-red">{{ fmt(payroll.pit) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <p-divider styleClass="my-0" />
+
+    <!-- Edit form -->
+    <div class="edit-section" [formGroup]="editForm">
+        <h4 class="section-title">Lương cơ bản</h4>
+        <p-inputnumber formControlName="baseSalary" styleClass="w-full" inputStyleClass="w-full" [useGrouping]="true"
+            suffix=" đ" [disabled]="!canEdit()" />
+
+        <div class="items-header">
+            <h4 class="section-title">Khoản cộng / trừ thêm</h4>
+            <p-button *ngIf="canEdit()" label="Thêm khoản" icon="pi pi-plus" size="small" [text]="true"
+                (onClick)="addItemRow()" />
+        </div>
+
+        <div formArrayName="items" class="items-list">
+            <div class="item-row" *ngFor="let item of itemsArray.controls; let i = index" [formGroupName]="i">
+                <div class="item-row__fields">
+                    <p-select formControlName="type" [options]="itemTypeOptions" optionLabel="label" optionValue="value"
+                        styleClass="item-type-select" [disabled]="!canEdit()"
+                        [ngClass]="{ 'ng-invalid ng-dirty': isItemInvalid(i, 'type') }" />
+                    <input pInputText formControlName="label" placeholder="Tên khoản" class="item-label-input"
+                        [ngClass]="{ 'ng-invalid ng-dirty': isItemInvalid(i, 'label') }" />
+                    <p-inputnumber formControlName="amount" [useGrouping]="true" placeholder="Số tiền"
+                        styleClass="item-amount" inputStyleClass="w-full" [disabled]="!canEdit()"
+                        [ngClass]="{ 'ng-invalid ng-dirty': isItemInvalid(i, 'amount') }" />
+                    <p-button *ngIf="canEdit()" icon="pi pi-trash" [text]="true" severity="danger" size="small"
+                        (onClick)="removeItem(i)" />
+                </div>
+                <div class="item-errors">
+                    <small class="p-error" *ngIf="isItemInvalid(i, 'label')">Nhập tên khoản</small>
+                    <small class="p-error" *ngIf="isItemInvalid(i, 'amount')">Nhập số tiền hợp lệ</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel__save" *ngIf="canEdit()">
+            <p-button label="Lưu & Tính lại" icon="pi pi-refresh" styleClass="w-full" [loading]="isSaving"
+                (onClick)="save()" />
+        </div>
+    </div>
+
+</div>

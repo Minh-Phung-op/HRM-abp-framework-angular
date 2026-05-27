@@ -1,0 +1,194 @@
+// =============================================
+// Employee List — component-only styles
+// Shared styles (buttons, forms, badges, modal,
+// pagination, spinner, dropdown) live in styles.css
+// =============================================
+
+.employee-page {
+  padding: 24px 32px;
+  min-height: 100vh;
+}
+
+// ---- Page header ----
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.total-badge {
+  background: var(--blue-light);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+// ---- Filter panel ----
+.filter-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px 16px;
+  align-items: end;
+}
+
+.filter-item--wide {
+  grid-column: span 2;
+  @media (max-width: 768px) { grid-column: span 1; }
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-100);
+}
+
+// ---- Table wrapper ----
+.table-wrapper {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+// ---- Table ----
+.employee-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead tr {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700);
+    vertical-align: middle;
+  }
+}
+
+.employee-row {
+  transition: background 0.1s;
+
+  &:hover { background: var(--gray-50); }
+  &:last-child td { border-bottom: none; }
+}
+
+// ---- Column widths ----
+.col-avatar  { width: 52px; }
+.col-name    { min-width: 160px; }
+.col-gender  { width: 80px; }
+.col-dob     { width: 110px; }
+.col-email   { min-width: 180px; }
+.col-phone   { width: 120px; }
+.col-dept    { width: 130px; }
+.col-pos     { width: 140px; }
+.col-manager { width: 130px; }
+.col-status  { width: 130px; }
+.col-action  { width: 50px; }
+
+// ---- Name cell ----
+.name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.employee-name {
+  color: var(--blue);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--blue-hover);
+    text-decoration: underline;
+  }
+}
+
+.employee-code {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+// ---- Email link ----
+.email-link {
+  color: var(--gray-700);
+  text-decoration: none;
+  &:hover { color: var(--blue); text-decoration: underline; }
+}
+
+// ---- Dept badge ----
+.dept-badge {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+// ---- Empty state ----
+.empty-state {
+  text-align: center;
+  padding: 60px 0 !important;
+}
+
+.empty-inner {
+  color: var(--gray-400);
+
+  i { font-size: 36px; margin-bottom: 12px; display: block; }
+  p { font-size: 14px; margin: 0; }
+}

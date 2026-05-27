@@ -1,0 +1,109 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "5.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.Account": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.Identity": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "10.3.0",
+      "isInstalled": true,
+      "creationTime": "05/18/2026 17:05:07 +00:00"
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "Acme.HRM.Application": {
+      "path": "src/Acme.HRM.Application/Acme.HRM.Application.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.Application.Tests": {
+      "path": "test/Acme.HRM.Application.Tests/Acme.HRM.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "Acme.HRM.Domain.Shared": {
+      "path": "src/Acme.HRM.Domain.Shared/Acme.HRM.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.Application.Contracts": {
+      "path": "src/Acme.HRM.Application.Contracts/Acme.HRM.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.HttpApi": {
+      "path": "src/Acme.HRM.HttpApi/Acme.HRM.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.HttpApi.Client": {
+      "path": "src/Acme.HRM.HttpApi.Client/Acme.HRM.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.EntityFrameworkCore.Tests": {
+      "path": "test/Acme.HRM.EntityFrameworkCore.Tests/Acme.HRM.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "Acme.HRM.EntityFrameworkCore": {
+      "path": "src/Acme.HRM.EntityFrameworkCore/Acme.HRM.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.TestBase": {
+      "path": "test/Acme.HRM.TestBase/Acme.HRM.TestBase.abppkg",
+      "folder": "test"
+    },
+    "Acme.HRM.Domain.Tests": {
+      "path": "test/Acme.HRM.Domain.Tests/Acme.HRM.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "Acme.HRM.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/Acme.HRM.HttpApi.Client.ConsoleTestApp/Acme.HRM.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "Acme.HRM.DbMigrator": {
+      "path": "src/Acme.HRM.DbMigrator/Acme.HRM.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.HttpApi.Host": {
+      "path": "src/Acme.HRM.HttpApi.Host/Acme.HRM.HttpApi.Host.abppkg",
+      "folder": "src"
+    },
+    "Acme.HRM.Domain": {
+      "path": "src/Acme.HRM.Domain/Acme.HRM.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}

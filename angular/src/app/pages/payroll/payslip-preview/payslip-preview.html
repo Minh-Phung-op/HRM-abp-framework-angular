@@ -1,0 +1,149 @@
+<div class="payslip" id="payslip-print">
+
+    <!-- Company header -->
+    <div class="payslip__header">
+        <div class="payslip__company">
+            <div class="payslip__logo">
+                <i class="pi pi-building"></i>
+            </div>
+            <div>
+                <div class="payslip__company-name">CÔNG TY TNHH ABC</div>
+                <div class="payslip__company-sub">123 Đường XYZ, Quận 1, TP.HCM</div>
+            </div>
+        </div>
+        <div class="payslip__title-block">
+            <div class="payslip__title">PHIẾU LƯƠNG</div>
+            <div class="payslip__period">
+                Tháng {{ payroll.month | number:'2.0-0' }}/{{ payroll.year }}
+            </div>
+        </div>
+    </div>
+
+    <p-divider />
+
+    <!-- Employee info -->
+    <div class="payslip__emp-info">
+        <div class="info-pair">
+            <span class="info-key">Họ và tên</span>
+            <span class="info-val">{{ payroll.employeeName }}</span>
+        </div>
+        <div class="info-pair">
+            <span class="info-key">Mã nhân viên</span>
+            <span class="info-val">{{ payroll.employeeCode }}</span>
+        </div>
+        <div class="info-pair">
+            <span class="info-key">Phòng ban</span>
+            <span class="info-val">{{ payroll.departmentName }}</span>
+        </div>
+        <div class="info-pair">
+            <span class="info-key">Chức vụ</span>
+            <span class="info-val">{{ payroll.positionTitle }}</span>
+        </div>
+    </div>
+
+    <p-divider />
+
+    <!-- Two-column income/deduction -->
+    <div class="payslip__columns">
+
+        <!-- Income -->
+        <div class="payslip__col">
+            <div class="col-title col-title--income">
+                <i class="pi pi-plus-circle"></i> Thu nhập
+            </div>
+
+            <div class="col-row">
+                <span>Lương cơ bản</span>
+                <span>{{ fmt(payroll.baseSalary) }}</span>
+            </div>
+            <div class="col-row">
+                <span>Tổng Gross</span>
+                <span class="font-semibold">{{ fmt(payroll.grossSalary) }}</span>
+            </div>
+
+            <div class="col-section" *ngIf="additions.length > 0">
+                <div class="col-section-label">Phụ cấp & Thưởng</div>
+                <div class="col-row" *ngFor="let item of additions">
+                    <span>{{ item.label }}</span>
+                    <span class="text-green">+{{ fmt(item.amount) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="columns-divider"></div>
+
+        <!-- Deductions -->
+        <div class="payslip__col">
+            <div class="col-title col-title--deduction">
+                <i class="pi pi-minus-circle"></i> Khấu trừ
+            </div>
+
+            <div class="col-row">
+                <span>BHXH (8%)</span>
+                <span class="text-red">{{ fmt(payroll.bhxhEmployee) }}</span>
+            </div>
+            <div class="col-row">
+                <span>BHYT (1.5%)</span>
+                <span class="text-red">{{ fmt(payroll.bhytEmployee) }}</span>
+            </div>
+            <div class="col-row">
+                <span>BHTN (1%)</span>
+                <span class="text-red">{{ fmt(payroll.bhtnEmployee) }}</span>
+            </div>
+            <div class="col-row">
+                <span>Thuế TNCN</span>
+                <span class="text-red font-semibold">{{ fmt(payroll.pit) }}</span>
+            </div>
+
+            <div class="col-section" *ngIf="deductions.length > 0">
+                <div class="col-section-label">Khấu trừ khác</div>
+                <div class="col-row" *ngFor="let item of deductions">
+                    <span>{{ item.label }}</span>
+                    <span class="text-red">-{{ fmt(item.amount) }}</span>
+                </div>
+            </div>
+
+            <div class="col-row col-row--total">
+                <span>Tổng khấu trừ</span>
+                <span class="text-red font-bold">{{ fmt(payroll.totalDeduction) }}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <p-divider />
+
+    <!-- Net salary -->
+    <div class="payslip__net">
+        <span class="net-label">THỰC NHẬN</span>
+        <span class="net-value">{{ fmt(payroll.netSalary) }}</span>
+    </div>
+
+    <p-divider />
+
+    <!-- Footer -->
+    <div class="payslip__footer">
+        <div class="footer-sig">
+            <div class="sig-label">Nhân viên ký nhận</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">{{ payroll.employeeName }}</div>
+        </div>
+        <div class="footer-sig">
+            <div class="sig-label">Phòng Nhân sự</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">_______________</div>
+        </div>
+        <div class="footer-sig">
+            <div class="sig-label">Giám đốc</div>
+            <div class="sig-line"></div>
+            <div class="sig-name">_______________</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Print button — ẩn khi print -->
+<div class="payslip-actions no-print">
+    <p-button label="Xuất PDF / In" icon="pi pi-print" (onClick)="printPayslip()" />
+</div>

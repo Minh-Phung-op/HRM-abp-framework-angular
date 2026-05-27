@@ -1,0 +1,170 @@
+.panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--p-content-border-color);
+        flex-shrink: 0;
+    }
+
+    &__emp {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    &__emp-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--p-text-color);
+    }
+
+    &__emp-meta {
+        font-size: 12px;
+        color: var(--p-text-muted-color);
+    }
+
+    &__header-actions {
+        display: flex;
+        gap: 4px;
+    }
+
+    &__save {
+        padding: 16px 0 0;
+    }
+}
+
+// ---- Salary summary ----
+.salary-summary {
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--p-surface-50, #f9fafb);
+}
+
+.salary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--p-text-muted-color);
+
+    &--highlight {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--p-text-color);
+        padding-bottom: 6px;
+        border-bottom: 1px dashed var(--p-content-border-color);
+        margin-bottom: 2px;
+    }
+}
+
+.salary-net {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--p-primary-color);
+}
+
+.text-red {
+    color: var(--p-red-500, #ef4444);
+}
+
+// ---- Breakdown ----
+.breakdown-section,
+.edit-section {
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--p-text-muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.breakdown-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--p-surface-100, #f1f5f9);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.breakdown-label {
+    font-size: 11px;
+    color: var(--p-text-muted-color);
+    font-weight: 500;
+}
+
+.breakdown-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--p-text-color);
+}
+
+// ---- Items ----
+.items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item-row {
+    background: var(--p-surface-50, #f9fafb);
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 8px;
+    padding: 10px;
+
+    &__fields {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+}
+
+.item-type-select {
+    width: 110px;
+    flex-shrink: 0;
+}
+
+.item-label-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-amount {
+    width: 110px;
+    flex-shrink: 0;
+}
+
+.item-errors {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+    padding-left: 2px;
+}

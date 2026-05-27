@@ -1,0 +1,220 @@
+// Dùng chung pattern với leave-balance, employee-detail, contract-list
+
+.lb-page {
+  padding: 24px 32px;
+  min-height: 100vh;
+}
+
+// ---- Header ----
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.lb-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: var(--p-text-color);
+}
+
+.lb-subtitle {
+  font-size: 13px;
+  color: var(--p-text-muted-color);
+  margin: 0;
+}
+
+// ---- Filter bar ----
+.lb-filter {
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+  flex: 1;
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--p-text-color);
+  }
+
+  &--wide  { flex: 2; min-width: 220px; }
+  &--action { flex: 0 0 auto; min-width: auto; }
+}
+
+// ---- Table wrap ----
+.lb-table-wrap {
+  background: var(--p-content-background);
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+// ---- Name cell ----
+.lt-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lt-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i { font-size: 14px; }
+
+  &--paid {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  &--unpaid {
+    background: var(--p-surface-100, #f1f5f9);
+    color: var(--p-text-muted-color);
+  }
+}
+
+.lt-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--p-text-color);
+}
+
+// ---- Code tag monospace ----
+:host ::ng-deep .lt-code-tag .p-tag-label {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+}
+
+// ---- Day badge ----
+.day-badge {
+  display: inline-block;
+  background: var(--p-blue-50, #eff6ff);
+  color: var(--p-blue-700, #1d4ed8);
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-size: 13px;
+  font-weight: 600;
+
+  &--green {
+    background: var(--p-green-50, #f0fdf4);
+    color: var(--p-green-700, #15803d);
+  }
+}
+
+.text-muted {
+  color: var(--p-text-muted-color);
+}
+
+// ---- Empty row ----
+.empty-row {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--p-text-muted-color);
+
+  i { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+  p { margin: 0; font-size: 14px; }
+}
+
+// ---- Dialog form ----
+.form-grid-single {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.form-hint-inline {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--p-text-muted-color);
+  margin-left: 6px;
+}
+
+.required { color: var(--p-red-500, #ef4444); }
+
+// ---- Toggle block ----
+.toggle-block {
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--p-content-border-color);
+
+  &:last-child { border-bottom: none; }
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.toggle-desc {
+  font-size: 12px;
+  color: var(--p-text-muted-color);
+}
+
+// ---- Carry field slide-in ----
+.carry-field {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+
+  &--visible {
+    max-height: 120px;
+    opacity: 1;
+  }
+}

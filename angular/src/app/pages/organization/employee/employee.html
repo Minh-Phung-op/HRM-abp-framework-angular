@@ -1,0 +1,346 @@
+<div class="p-4 bg-slate-50 min-h-screen">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="text-2xl font-bold m-0 text-slate-800">Quản lý Nhân viên</h1>
+      <p class="text-slate-500 m-0">{{ totalCount() }} nhân sự trong hệ thống</p>
+    </div>
+    <p-button label="Thêm nhân viên" icon="pi pi-plus" [raised]="true" (onClick)="showCreateModal.set(true)"></p-button>
+  </div>
+
+  <p-dialog [header]="isEditMode() ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'" [(visible)]="showCreateModal"
+    [modal]="true" [style]="{ width: '750px' }" class="p-fluid">
+
+    <ng-template pTemplate="content">
+      <div [formGroup]="employeeForm" class="grid mt-2">
+
+        <div class="col-12 flex flex-column align-items-center justify-content-center mb-4 gap-3">
+          <div class="relative">
+            <p-avatar [image]="avatarPreview() || 'assets/images/default-avatar.png'" shape="circle" size="xlarge"
+              styleClass="shadow-2 border-2 border-slate-200" [style]="{'width': '120px', 'height': '120px'}">
+            </p-avatar>
+
+            <button *ngIf="avatarPreview()" type="button" (click)="removeAvatar()"
+              class="absolute top-0 right-0 bg-red-500 text-white border-circle border-none w-2rem h-2rem flex align-items-center justify-content-center cursor-pointer shadow-2 hover:bg-red-600 transition-all">
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          </div>
+
+          <div class="flex gap-2">
+            <input type="file" accept="image/*" id="avatarUpload" class="hidden" (change)="onFileSelected($event)">
+
+            <p-button [label]="avatarPreview() ? 'Thay đổi ảnh' : 'Chọn ảnh đại diện'" icon="pi pi-camera"
+              [outlined]="true" severity="secondary" size="small" (onClick)="fileInput.click()" #fileInputBtn>
+              <input #fileInput type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+            </p-button>
+          </div>
+          <small class="text-slate-400">Định dạng: JPG, PNG. Dung lượng tối đa: 2MB</small>
+        </div>
+        
+        <!-- Mã nhân viên -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Mã nhân viên <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="employeeCode" placeholder="NV-001"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('employeeCode')}" />
+          <small class="p-error" *ngIf="isInvalid('employeeCode')">
+            {{ getError('employeeCode') }}
+          </small>
+        </div>
+
+        <!-- Họ và tên -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Họ và tên <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="fullName" placeholder="Nguyễn Văn A"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('fullName')}" />
+          <small class="p-error" *ngIf="isInvalid('fullName')">
+            {{ getError('fullName') }}
+          </small>
+        </div>
+
+        <!-- Email -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Email <span class="text-red-500">*</span></label>
+          <input pInputText formControlName="email" placeholder="email@congty.com"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('email')}" />
+          <small class="p-error" *ngIf="isInvalid('email')">
+            {{ getError('email') }}
+          </small>
+        </div>
+
+        <!-- Số điện thoại -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Số điện thoại</label>
+          <input pInputText formControlName="phone" [ngClass]="{'ng-invalid ng-dirty': isInvalid('phone')}" />
+          <small class="p-error" *ngIf="isInvalid('phone')">
+            {{ getError('phone') }}
+          </small>
+        </div>
+
+        <!-- Ngày sinh -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Ngày sinh</label>
+          <p-datepicker formControlName="dateOfBirth" [showIcon]="true" dateFormat="dd/mm/yy" appendTo="body"
+            dataType="date" [ngClass]="{'ng-invalid ng-dirty': isInvalid('dateOfBirth')}" />
+          <small class="p-error" *ngIf="isInvalid('dateOfBirth')">
+            {{ getError('dateOfBirth') }}
+          </small>
+        </div>
+
+        <!-- Giới tính -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Giới tính <span class="text-red-500">*</span></label>
+          <p-select [options]="genderOptions.slice(1)" formControlName="gender" optionLabel="label" optionValue="value"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('gender')}" />
+          <small class="p-error" *ngIf="isInvalid('gender')">
+            {{ getError('gender') }}
+          </small>
+        </div>
+
+        <!-- Phòng ban -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Phòng ban <span class="text-red-500">*</span></label>
+          <p-select [options]="departmentOptions()" formControlName="departmentId" optionLabel="name" optionValue="id"
+            placeholder="Chọn phòng ban" (onChange)="onDepartmentChange($event.value)"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('departmentId')}" />
+          <small class="p-error" *ngIf="isInvalid('departmentId')">
+            {{ getError('departmentId') }}
+          </small>
+        </div>
+
+        <!-- Chức vụ -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Chức vụ <span class="text-red-500">*</span></label>
+          <p-select [options]="positionOptions()" formControlName="positionId" optionLabel="title" optionValue="id"
+            placeholder="Chọn chức vụ" [disabled]="!employeeForm.get('departmentId')?.value"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('positionId')}" />
+          <small class="p-error" *ngIf="isInvalid('positionId')">
+            {{ getError('positionId') }}
+          </small>
+        </div>
+
+        <!-- Người quản lý -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Người quản lý trực tiếp</label>
+          <p-select [options]="managerOptions()" formControlName="managerId" optionLabel="fullName" optionValue="id"
+            [filter]="true" filterBy="fullName" [showClear]="true" placeholder="Tìm kiếm quản lý..."
+            (onFilter)="loadManagerSuggestions($event.filter, employeeForm.get('departmentId')?.value)">
+            <ng-template let-m pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                <p-avatar [label]="m.fullName.charAt(0)" shape="circle" size="small" />
+                <div class="flex flex-column">
+                  <span class="font-medium text-sm">{{ m.fullName }}</span>
+                  <small class="text-slate-500">{{ m.positionTitle }}</small>
+                </div>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+
+        <!-- Ngày bắt đầu -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Ngày bắt đầu làm việc <span class="text-red-500">*</span></label>
+          <p-datepicker formControlName="startDate" [showIcon]="true" appendTo="body" dateFormat="dd/mm/yy"
+            dataType="date" [ngClass]="{'ng-invalid ng-dirty': isInvalid('startDate')}" />
+          <small class="p-error" *ngIf="isInvalid('startDate')">
+            {{ getError('startDate') }}
+          </small>
+        </div>
+
+        <!-- Loại hợp đồng -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Loại hợp đồng <span class="text-red-500">*</span></label>
+          <p-select [options]="contractTypeOptions.slice(1)" formControlName="contractType" optionLabel="label"
+            optionValue="value" [ngClass]="{'ng-invalid ng-dirty': isInvalid('contractType')}" />
+          <small class="p-error" *ngIf="isInvalid('contractType')">
+            {{ getError('contractType') }}
+          </small>
+        </div>
+
+        <!-- CMND/CCCD -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Số CMND/CCCD</label>
+          <input pInputText formControlName="nationalId" [ngClass]="{'ng-invalid ng-dirty': isInvalid('nationalId')}" />
+          <small class="p-error" *ngIf="isInvalid('nationalId')">
+            {{ getError('nationalId') }}
+          </small>
+        </div>
+
+        <!-- Trạng thái -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Trạng thái nhân sự <span class="text-red-500">*</span></label>
+          <p-select [options]="statusOptions.slice(1)" formControlName="status" optionLabel="label" optionValue="value"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('status')}" />
+          <small class="p-error" *ngIf="isInvalid('status')">
+            {{ getError('status') }}
+          </small>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div class="col-12 md:col-6 field flex flex-column">
+          <label class="font-bold">Địa chỉ thường trú</label>
+          <input pInputText formControlName="address" placeholder="Số nhà, tên đường, tỉnh thành..." />
+        </div>
+
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <p-button label="Hủy" icon="pi pi-times" [text]="true" severity="secondary"
+        (onClick)="showCreateModal.set(false)"></p-button>
+      <p-button [label]="isEditMode() ? 'Cập nhật' : 'Lưu thông tin'" icon="pi pi-check" [loading]="isSubmitting()"
+        (onClick)="saveEmployee()"></p-button>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog header="Cấp tài khoản hệ thống" [(visible)]="showAccountModal" [modal]="true" [style]="{ width: '400px' }"
+    [draggable]="false" [resizable]="false">
+
+    <div [formGroup]="accountForm" class="flex flex-column gap-3 mt-3">
+      <div class="field">
+        <label class="font-bold block mb-2">Tên đăng nhập (Email)</label>
+        <input pInputText formControlName="userName" class="w-full bg-slate-100" />
+        <small class="text-slate-500">Mặc định sử dụng Email nhân viên và không thể thay đổi.</small>
+      </div>
+
+      <div class="field">
+        <label class="font-bold block mb-2">Mật khẩu khởi tạo</label>
+        <p-password formControlName="password" [toggleMask]="true" class="w-full" styleClass="w-full"
+          inputStyleClass="w-full">
+        </p-password>
+      </div>
+
+      <div class="field">
+        <label class="font-bold block mb-2">Vai trò truy cập <span class="text-red-500">*</span></label>
+        <p-select [options]="roleOptions()" formControlName="roleName" placeholder="Chọn quyền hệ thống" class="w-full"
+          appendTo="body">
+        </p-select>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <p-button label="Hủy" icon="pi pi-times" [text]="true" severity="secondary"
+        (onClick)="showAccountModal.set(false)"></p-button>
+      <p-button label="Xác nhận cấp tài khoản" icon="pi pi-check" [loading]="isSubmitting()"
+        (onClick)="confirmCreateAccount()"></p-button>
+    </ng-template>
+  </p-dialog>
+
+  <div class="bg-white p-4 border-round-xl shadow-sm mb-4 border-1 border-slate-200" [formGroup]="filterForm">
+    <div class="grid p-fluid">
+      <div class="col-12 md:col-4">
+        <label class="block mb-2 font-semibold text-sm">Tìm kiếm</label>
+        <p-iconfield>
+          <p-inputicon class="pi pi-search"></p-inputicon>
+          <input pInputText type="text" formControlName="keyword" placeholder="Tên, mã NV, email..."
+            (keyup.enter)="onFilterChange()" />
+        </p-iconfield>
+      </div>
+
+      <div class="col-12 md:col-2">
+        <label class="block mb-2 font-semibold text-sm">Giới tính</label>
+        <p-select [options]="genderOptions" formControlName="gender" optionLabel="label" optionValue="value"
+          (onChange)="onFilterChange()"></p-select>
+      </div>
+
+      <div class="col-12 md:col-3">
+        <label class="block mb-2 font-semibold text-sm">Trạng thái</label>
+        <p-select [options]="statusOptions" formControlName="status" optionLabel="label" optionValue="value"
+          (onChange)="onFilterChange()"></p-select>
+      </div>
+
+      <div class="col-12 md:col-3">
+        <label class="block mb-2 font-semibold text-sm">Loại hợp đồng</label>
+        <p-select [options]="contractTypeOptions" formControlName="contractType" optionLabel="label" optionValue="value"
+          (onChange)="onFilterChange()"></p-select>
+      </div>
+
+      <div class="col-12 md:col-3 mt-2">
+        <label class="block mb-2 font-semibold text-sm">Từ ngày</label>
+        <p-datepicker formControlName="startDateFrom" [showIcon]="true" dateFormat="dd/mm/yy"
+          (onSelect)="onFilterChange()"></p-datepicker>
+      </div>
+
+      <div class="col-12 md:col-3 mt-2">
+        <label class="block mb-2 font-semibold text-sm">Đến ngày</label>
+        <p-datepicker formControlName="startDateTo" [showIcon]="true" dateFormat="dd/mm/yy"
+          (onSelect)="onFilterChange()"></p-datepicker>
+      </div>
+
+      <div class="col-12 md:col-6 mt-2 flex align-items-end justify-content-end">
+        <p-button icon="pi pi-filter-slash" severity="secondary" [text]="true" label="Xóa bộ lọc"
+          (onClick)="resetFilter()"></p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border-round-xl shadow-sm border-1 border-slate-200 overflow-hidden">
+    <p-table [value]="employees()" [lazy]="true" (onLazyLoad)="loadEmployees($event)" [paginator]="true" [rows]="rows"
+      [first]="first" [totalRecords]="totalCount()" [loading]="isLoading()" [stripedRows]="true" [rowHover]="true"
+      responsiveLayout="scroll" styleClass="p-datatable-sm">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 4rem"></th>
+          <th>Nhân viên</th>
+          <th>Giới tính</th>
+          <th>Ngày sinh</th>
+          <th>Liên hệ</th>
+          <th>Công tác</th>
+          <th>Trạng thái</th>
+          <th style="width: 4rem"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-emp>
+        <tr>
+          <td>
+            <p-avatar [image]="emp.avatarUrl" [label]="!emp.avatarUrl ? emp.fullName.charAt(0) : null" shape="circle"
+              [style]="{'background-color': '#dee2e6', 'color': '#212529'}">
+            </p-avatar>
+          </td>
+          <td>
+            <div class="flex flex-column">
+              <div class="flex align-items-center gap-2">
+                <span class="font-bold text-blue-700 cursor-pointer" (click)="goToDetail(emp.id)">
+                  {{ emp.fullName}}
+                </span>
+                <i *ngIf="emp.userId" class="pi pi-verified text-green-500" pTooltip="Đã cấp tài khoản"></i>
+              </div>
+              <span class="text-xs text-slate-500">{{ emp.employeeCode }}</span>
+            </div>
+          </td>
+          <td>{{ getGenderLabel(emp.gender) }}</td>
+          <td>{{ emp.dateOfBirth | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <div class="flex flex-column gap-1 text-sm">
+              <span><i class="pi pi-envelope mr-1 text-xs"></i>{{ emp.email }}</span>
+              <span><i class="pi pi-phone mr-1 text-xs"></i>{{ emp.phone }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="flex flex-column gap-1">
+              <span class="font-medium">{{ emp.positionTitle }}</span>
+              <p-tag [value]="emp.departmentName" severity="info" [rounded]="true"></p-tag>
+            </div>
+          </td>
+          <td>
+            <p-tag [severity]="getStatusSeverity(emp.status)" [value]="getStatusLabel(emp.status)"></p-tag>
+          </td>
+          <td class="text-center">
+            <p-button icon="pi pi-ellipsis-v" severity="secondary" [text]="true"
+              (onClick)="menu.toggle($event)"></p-button>
+            <p-menu #menu [popup]="true" [model]="getMenuItems(emp)" appendTo="body"></p-menu>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center p-5 text-slate-400">
+            <i class="pi pi-users block mb-2 text-4xl"></i>
+            <p>Không tìm thấy nhân viên nào phù hợp bộ lọc</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

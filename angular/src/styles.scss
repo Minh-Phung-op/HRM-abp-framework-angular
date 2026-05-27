@@ -1,0 +1,67 @@
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.css";
+@import "primeicons/primeicons.css";
+
+/* =============================================
+   GLOBAL SHARED STYLES (Optimized for PrimeNG)
+   ============================================= */
+
+:root {
+  /* Giữ nguyên biến màu để map vào PrimeNG Theme nếu cần */
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --gray-50: #f8fafc;
+  --gray-200: #e2e8f0;
+  --gray-500: #64748b;
+  --gray-900: #0f172a;
+  --white: #ffffff;
+  --red: #ef4444;
+  --status-active-color: #16a34a;
+  --status-active-bg: #f0fdf4;
+  
+  --font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family);
+  background: var(--gray-50);
+  color: #334155;
+  margin: 0;
+}
+
+/* Page Header Structure (Vẫn giữ vì PrimeNG không lo phần Layout lớn này) */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+/* Custom Status Badge (Dùng bên trong p-table) */
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.active-badge--on { background: var(--status-active-bg); color: var(--status-active-color); }
+.active-badge--on .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--status-active-color); }
+
+/* Typography Helpers */
+.text-muted { color: var(--gray-500); }
+.text-danger { color: var(--red); }
+.font-bold { font-weight: 600; }

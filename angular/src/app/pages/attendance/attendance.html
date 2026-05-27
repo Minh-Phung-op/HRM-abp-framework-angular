@@ -1,0 +1,256 @@
+<p-toast position="top-right" />
+<p-confirmDialog />
+
+<div class="att-page">
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="att-topbar">
+        <div>
+            <h1 class="lb-title">Bảng chấm công</h1>
+            <p class="lb-subtitle">{{ filteredRows().length }} nhân viên · {{ monthLabel }}</p>
+        </div>
+        <div class="lb-header-actions">
+            <p-button icon="pi pi-chevron-left" [text]="true" severity="secondary" (onClick)="prevMonth()" />
+            <div class="month-nav">
+                <p-select [options]="monthOptions" [(ngModel)]="currentMonth" optionLabel="label" optionValue="value"
+                    styleClass="nav-select" (onChange)="goToMonth()" />
+                <p-select [options]="yearOptions" [(ngModel)]="currentYear" optionLabel="label" optionValue="value"
+                    styleClass="nav-select" (onChange)="goToMonth()" />
+            </div>
+            <p-button icon="pi pi-chevron-right" [text]="true" severity="secondary" (onClick)="nextMonth()" />
+        </div>
+    </div>
+
+    <!-- ===== CHECK-IN WIDGET ===== -->
+    <div class="checkin-widget">
+
+        <div class="checkin-widget__clock">
+            <i class="pi pi-clock"></i>
+            <span class="clock-display">{{ clockDisplay() }}</span>
+            <span class="clock-date">{{ today | date:'EEEE, dd/MM/yyyy':'':'vi' }}</span>
+        </div>
+
+        <div class="checkin-widget__divider"></div>
+
+        <div class="checkin-widget__actions">
+            <p-button label="Check In" icon="pi pi-sign-in" severity="success" [loading]="isCheckingIn()"
+                [disabled]="hasCheckedIn" (onClick)="doCheckIn()" />
+            <p-button label="Check Out" icon="pi pi-sign-out" severity="danger" [loading]="isCheckingOut()"
+                [disabled]="!hasCheckedIn || hasCheckedOut" (onClick)="doCheckOut()" />
+        </div>
+
+        <div class="checkin-widget__divider"></div>
+
+        <div class="checkin-widget__status">
+            <div class="status-pair">
+                <span class="status-pair__label"><i class="pi pi-arrow-right-arrow-left"></i> Check-in</span>
+                <span class="status-pair__value" [class.status-pair__value--set]="hasCheckedIn">
+                    {{ hasCheckedIn ? formatTime(checkinRecord()!.checkInAt) : '—' }}
+                </span>
+            </div>
+            <div class="status-pair">
+                <span class="status-pair__label"><i class="pi pi-check-circle"></i> Check-out</span>
+                <span class="status-pair__value" [class.status-pair__value--set]="hasCheckedOut">
+                    {{ hasCheckedOut ? formatTime(checkinRecord()!.checkOutAt) : '—' }}
+                </span>
+            </div>
+            <div class="status-pair" *ngIf="checkinRecord()">
+                <span class="status-pair__label"><i class="pi pi-tag"></i> Trạng thái</span>
+                <p-tag [value]="getStatusLabel(checkinRecord()!.status)"
+                    [severity]="getStatusSeverity(checkinRecord()!.status)" />
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== FILTER ===== -->
+    <div class="att-filter" [formGroup]="filterForm">
+        <p-iconfield>
+            <p-inputicon class="pi pi-search" />
+            <input pInputText formControlName="keyword" placeholder="Tìm tên hoặc mã nhân viên..." />
+        </p-iconfield>
+
+        <div class="legend">
+            <span class="legend-item"><span class="legend-dot dot--present"></span>X = Đi làm</span>
+            <span class="legend-item"><span class="legend-dot dot--late"></span>M = Đi muộn</span>
+            <span class="legend-item"><span class="legend-dot dot--absent"></span>KP = Vắng</span>
+            <span class="legend-item"><span class="legend-dot dot--onleave"></span>P = Nghỉ phép</span>
+            <span class="legend-item"><span class="legend-dot dot--halfday"></span>½ = Nửa ngày</span>
+        </div>
+    </div>
+
+    <!-- ===== GRID ===== -->
+    <div class="grid-wrap">
+        <div class="att-grid" *ngIf="!isLoading(); else skeleton">
+
+            <!-- Header row: sticky employee col + day cols -->
+            <div class="grid-header">
+                <div class="cell-emp cell-emp--header">Nhân viên</div>
+                <div class="cell-day cell-day--header" *ngFor="let h of dayHeaders()"
+                    [class.cell-day--weekend]="h.isWeekend"
+                    [class.cell-day--today]="h.day === today.getDate() && currentMonth() === today.getMonth()+1 && currentYear() === today.getFullYear()">
+                    <span class="day-num">{{ h.day }}</span>
+                    <span class="day-wday">{{ h.weekday }}</span>
+                </div>
+                <div class="cell-total cell-total--header">Tổng công</div>
+            </div>
+
+            <!-- Body rows -->
+            <div class="grid-row" *ngFor="let row of filteredRows()">
+
+                <!-- Employee name -->
+                <div class="cell-emp">
+                    <span class="emp-name">{{ row.employeeName }}</span>
+                    <span class="emp-code">{{ row.employeeCode }}</span>
+                </div>
+
+                <!-- Day cells -->
+                <div *ngFor="let h of dayHeaders(); let i = index" [class]="getCellClass(row.days[i], h.isWeekend)"
+                    [class.cell-day--today]="h.day === today.getDate() && currentMonth() === today.getMonth()+1 && currentYear() === today.getFullYear()"
+                    (click)="onCellClick(row, i)"
+                    [pTooltip]="row.days[i] ? getStatusLabel(row.days[i]!.status) + (row.days[i]!.isLocked ? ' · Đã khoá' : '') : 'Chưa có dữ liệu'"
+                    tooltipPosition="top">
+                    <span class="cell-symbol">{{ getCellSymbol(row.days[i]) }}</span>
+                    <i class="pi pi-lock cell-lock-icon" *ngIf="row.days[i]?.isLocked"></i>
+                </div>
+
+                <!-- Total -->
+                <div class="cell-total">
+                    <span class="total-num">{{ row.totalPresent }}</span>
+                    <span class="total-label">ngày</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Skeleton loading -->
+        <ng-template #skeleton>
+            <div class="grid-skeleton">
+                <p-skeleton height="40px" styleClass="mb-2" *ngFor="let i of [1,2,3,4,5,6]" />
+            </div>
+        </ng-template>
+    </div>
+
+</div>
+
+
+<!-- ===== DIALOG: Edit attendance ===== -->
+<p-dialog header="Chỉnh sửa chấm công" [(visible)]="showEditDialog" [modal]="true" [draggable]="false"
+    [resizable]="false" [style]="{ width: '480px' }" (onHide)="editForm.reset()">
+    <div [formGroup]="editForm" class="form-grid">
+
+        <!-- Status -->
+        <div class="form-field form-field--full">
+            <label class="form-label">Trạng thái <span class="required">*</span></label>
+            <p-select formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value"
+                placeholder="Chọn trạng thái" styleClass="w-full"
+                [ngClass]="{ 'ng-invalid ng-dirty': isFormInvalid(editForm, 'status') }" />
+            <small class="p-error" *ngIf="isFormInvalid(editForm, 'status')">
+                {{ getFormError(editForm, 'status') }}
+            </small>
+        </div>
+
+        <!-- Check-in -->
+        <div class="form-field">
+            <label class="form-label">Giờ vào</label>
+            <p-datepicker formControlName="checkInAt" [timeOnly]="true" [showIcon]="true" icon="pi pi-clock"
+                styleClass="w-full" hourFormat="24" />
+        </div>
+
+        <!-- Check-out -->
+        <div class="form-field">
+            <label class="form-label">Giờ ra</label>
+            <p-datepicker formControlName="checkOutAt" [timeOnly]="true" [showIcon]="true" icon="pi pi-clock"
+                styleClass="w-full" hourFormat="24" />
+        </div>
+
+        <!-- Late minutes -->
+        <div class="form-field">
+            <label class="form-label">Đi muộn (phút)</label>
+            <p-inputnumber formControlName="lateMinutes" [min]="0" [max]="1440" styleClass="w-full"
+                inputStyleClass="w-full"
+                [ngClass]="{ 'ng-invalid ng-dirty': isFormInvalid(editForm, 'lateMinutes') }" />
+            <small class="p-error" *ngIf="isFormInvalid(editForm, 'lateMinutes')">
+                {{ getFormError(editForm, 'lateMinutes') }}
+            </small>
+        </div>
+
+        <!-- Early leave -->
+        <div class="form-field">
+            <label class="form-label">Về sớm (phút)</label>
+            <p-inputnumber formControlName="earlyLeaveMinutes" [min]="0" [max]="1440" styleClass="w-full"
+                inputStyleClass="w-full"
+                [ngClass]="{ 'ng-invalid ng-dirty': isFormInvalid(editForm, 'earlyLeaveMinutes') }" />
+            <small class="p-error" *ngIf="isFormInvalid(editForm, 'earlyLeaveMinutes')">
+                {{ getFormError(editForm, 'earlyLeaveMinutes') }}
+            </small>
+        </div>
+
+        <!-- OT -->
+        <div class="form-field">
+            <label class="form-label">Tăng ca (phút)</label>
+            <p-inputnumber formControlName="otMinutes" [min]="0" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+
+        <!-- Note -->
+        <div class="form-field form-field--full">
+            <label class="form-label">Ghi chú</label>
+            <textarea pTextarea formControlName="note" rows="2" placeholder="Lý do chỉnh sửa..."
+                style="width:100%"></textarea>
+        </div>
+
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="showEditDialog.set(false)" />
+        <p-button label="Lưu" icon="pi pi-check" [loading]="isEditSubmitting()" (onClick)="submitEdit()" />
+    </ng-template>
+</p-dialog>
+
+
+<!-- ===== DIALOG: Create attendance ===== -->
+<p-dialog header="Tạo bản ghi chấm công" [(visible)]="showCreateDialog" [modal]="true" [draggable]="false"
+    [resizable]="false" [style]="{ width: '480px' }" (onHide)="createForm.reset()">
+    <div [formGroup]="createForm" class="form-grid">
+
+        <div class="form-field form-field--full">
+            <label class="form-label">Trạng thái <span class="required">*</span></label>
+            <p-select formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value"
+                placeholder="Chọn trạng thái" styleClass="w-full"
+                [ngClass]="{ 'ng-invalid ng-dirty': isFormInvalid(createForm, 'status') }" />
+            <small class="p-error" *ngIf="isFormInvalid(createForm, 'status')">
+                {{ getFormError(createForm, 'status') }}
+            </small>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Giờ vào</label>
+            <p-datepicker formControlName="checkInAt" [timeOnly]="true" [showIcon]="true" icon="pi pi-clock"
+                styleClass="w-full" hourFormat="24" />
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Giờ ra</label>
+            <p-datepicker formControlName="checkOutAt" [timeOnly]="true" [showIcon]="true" icon="pi pi-clock"
+                styleClass="w-full" hourFormat="24" />
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Tăng ca (phút)</label>
+            <p-inputnumber formControlName="otMinutes" [min]="0" styleClass="w-full" inputStyleClass="w-full" />
+        </div>
+
+        <div class="form-field form-field--full">
+            <label class="form-label">Ghi chú</label>
+            <textarea pTextarea formControlName="note" rows="2" placeholder="Lý do tạo thủ công..."
+                style="width:100%"></textarea>
+        </div>
+
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="showCreateDialog.set(false)" />
+        <p-button label="Tạo" icon="pi pi-plus" [loading]="isCreateSubmitting()" (onClick)="submitCreate()" />
+    </ng-template>
+</p-dialog>

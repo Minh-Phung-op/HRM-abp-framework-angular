@@ -1,0 +1,354 @@
+<p-toast position="top-right" />
+
+<div class="leave-page">
+
+  <!-- ===== Header ===== -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div>
+        <h1 class="page-title">Quản lý nghỉ phép</h1>
+        <p class="page-subtitle">Tạo và theo dõi đơn nghỉ phép của bạn</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <i class="fas fa-plus"></i>
+      Tạo đơn mới
+    </button>
+  </div>
+
+  <!-- ===== Tabs ===== -->
+  <div class="tab-bar">
+    <button
+      class="tab-item"
+      [class.active]="activeTab === 'mine'"
+      (click)="switchTab('mine')"
+    >
+      <i class="fas fa-file-alt"></i>
+      Đơn của tôi
+      <span class="tab-count" *ngIf="myTotalCount > 0">{{ myTotalCount }}</span>
+    </button>
+    <button
+      class="tab-item"
+      [class.active]="activeTab === 'pending'"
+      (click)="switchTab('pending')"
+    >
+      <i class="fas fa-user-check"></i>
+      Đơn cần tôi duyệt
+      <span class="tab-count tab-count--alert" *ngIf="pendingTotalCount > 0">{{ pendingTotalCount }}</span>
+    </button>
+  </div>
+
+  <!-- ===== Tab: My Requests ===== -->
+  <div *ngIf="activeTab === 'mine'" class="tab-content">
+
+    <!-- Filter bar -->
+    <div class="filter-bar" [formGroup]="filterForm">
+      <div class="filter-group">
+        <p-select
+          formControlName="status"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Trạng thái"
+          styleClass="filter-dropdown"
+          [showClear]="true"
+        />
+      </div>
+      <div class="filter-group">
+        <p-select
+          formControlName="month"
+          [options]="monthOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Tháng"
+          styleClass="filter-dropdown"
+          [showClear]="true"
+        />
+      </div>
+      <div class="filter-group">
+        <p-select
+          formControlName="year"
+          [options]="yearOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Năm"
+          styleClass="filter-dropdown"
+          [showClear]="true"
+        />
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="resetFilter()">
+        <i class="fas fa-times"></i> Xóa lọc
+      </button>
+    </div>
+
+    <!-- Table -->
+    <p-table
+      [value]="myRequests"
+      [loading]="isLoading"
+      styleClass="leave-table"
+      [tableStyle]="{ 'min-width': '700px' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Loại phép</th>
+          <th>Từ ngày</th>
+          <th>Đến ngày</th>
+          <th>Số ngày</th>
+          <th>Lý do</th>
+          <th>Trạng thái</th>
+          <th></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-req>
+        <tr class="table-row">
+          <td>
+            <span class="leave-type-name">{{ req.leaveTypeName || '—' }}</span>
+          </td>
+          <td>{{ req.startDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ req.endDate | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="days-badge">{{ req.totalDays || '—' }} ngày</span>
+          </td>
+          <td class="reason-cell">
+            <span [pTooltip]="req.reason" tooltipPosition="top" class="reason-text">
+              {{ req.reason || '—' }}
+            </span>
+          </td>
+          <td>
+            <span class="status-pill" [ngClass]="getStatusClass(req.status)">
+              {{ getStatusLabel(req.status) }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-detail" (click)="goToDetail(req.id)">
+              <i class="fas fa-eye"></i>
+              Chi tiết
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
+              <p class="empty-title">Chưa có đơn nghỉ phép nào</p>
+              <p class="empty-sub">Nhấn "Tạo đơn mới" để tạo đơn đầu tiên</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="loadingbody">
+        <tr *ngFor="let i of [1,2,3,4,5]">
+          <td *ngFor="let j of [1,2,3,4,5,6,7]">
+            <p-skeleton height="1.2rem" />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- Paginator -->
+    <p-paginator
+      *ngIf="myTotalCount > myPageSize"
+      [rows]="myPageSize"
+      [totalRecords]="myTotalCount"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      (onPageChange)="onMyPageChange($event)"
+      styleClass="leave-paginator"
+    />
+  </div>
+
+  <!-- ===== Tab: Pending Approvals ===== -->
+  <div *ngIf="activeTab === 'pending'" class="tab-content">
+
+    <p-table
+      [value]="pendingRequests"
+      styleClass="leave-table"
+      [tableStyle]="{ 'min-width': '700px' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nhân viên</th>
+          <th>Loại phép</th>
+          <th>Từ ngày</th>
+          <th>Đến ngày</th>
+          <th>Số ngày</th>
+          <th>Lý do</th>
+          <th>Trạng thái</th>
+          <th></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-req>
+        <tr class="table-row">
+          <td>
+            <div class="employee-cell">
+              <div class="emp-avatar">{{ req.employeeName?.charAt(0)?.toUpperCase() }}</div>
+              <span class="emp-name">{{ req.employeeName || '—' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="leave-type-name">{{ req.leaveTypeName || '—' }}</span>
+          </td>
+          <td>{{ req.startDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ req.endDate | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="days-badge">{{ req.totalDays || '—' }} ngày</span>
+          </td>
+          <td class="reason-cell">
+            <span [pTooltip]="req.reason" tooltipPosition="top" class="reason-text">
+              {{ req.reason || '—' }}
+            </span>
+          </td>
+          <td>
+            <span class="status-pill" [ngClass]="getStatusClass(req.status)">
+              {{ getStatusLabel(req.status) }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-detail" (click)="goToDetail(req.id)">
+              <i class="fas fa-eye"></i>
+              Chi tiết
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">
+              <div class="empty-icon empty-icon--green"><i class="fas fa-check-circle"></i></div>
+              <p class="empty-title">Không có đơn nào cần duyệt</p>
+              <p class="empty-sub">Tất cả đơn đã được xử lý</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+
+<!-- =============================================
+     DIALOG: Tạo đơn mới
+     ============================================= -->
+<p-dialog
+  [(visible)]="showCreateModal"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="create-leave-dialog"
+  header="Tạo đơn nghỉ phép"
+  [style]="{ width: '520px' }"
+  (onHide)="closeCreate()"
+>
+  <ng-template pTemplate="content">
+    <form [formGroup]="createForm" class="create-form">
+
+      <!-- Leave type -->
+      <div class="field">
+        <label class="field-label">
+          Loại phép <span class="text-danger">*</span>
+        </label>
+        <p-select
+          formControlName="leaveTypeId"
+          [options]="leaveTypes"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Chọn loại phép"
+          styleClass="w-full"
+          [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('leaveTypeId') }"
+        />
+        <small class="text-danger" *ngIf="isFieldInvalid('leaveTypeId')">
+          Vui lòng chọn loại phép
+        </small>
+      </div>
+
+      <!-- Date range -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">
+            Từ ngày <span class="text-danger">*</span>
+          </label>
+          <p-datepicker
+            formControlName="startDate"
+            dateFormat="dd/mm/yy"
+            placeholder="dd/mm/yyyy"
+            styleClass="w-full"
+            [showIcon]="true"
+            appendTo="body"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('startDate') }"
+          />
+          <small class="text-danger" *ngIf="isFieldInvalid('startDate')">
+            Vui lòng chọn ngày bắt đầu
+          </small>
+        </div>
+
+        <div class="field">
+          <label class="field-label">
+            Đến ngày <span class="text-danger">*</span>
+          </label>
+          <p-datepicker
+            formControlName="endDate"
+            dateFormat="dd/mm/yy"
+            placeholder="dd/mm/yyyy"
+            styleClass="w-full"
+            [showIcon]="true"
+            appendTo="body"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('endDate') }"
+          />
+          <small class="text-danger" *ngIf="isFieldInvalid('endDate')">
+            Vui lòng chọn ngày kết thúc
+          </small>
+        </div>
+      </div>
+
+      <!-- Date range error -->
+      <div class="field-error-block" *ngIf="hasDateRangeError">
+        <i class="fas fa-exclamation-circle"></i>
+        Ngày kết thúc phải sau hoặc bằng ngày bắt đầu
+      </div>
+
+      <!-- Calculated days -->
+      <div class="days-preview" *ngIf="calculatedDays > 0">
+        <i class="fas fa-sun"></i>
+        Tổng <strong>{{ calculatedDays }} ngày</strong> nghỉ
+      </div>
+
+      <!-- Reason -->
+      <div class="field">
+        <label class="field-label">Lý do</label>
+        <textarea
+          pTextarea
+          formControlName="reason"
+          rows="3"
+          placeholder="Nhập lý do nghỉ phép (không bắt buộc)..."
+          class="w-full"
+          autoResize="true"
+        ></textarea>
+      </div>
+
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button class="btn btn-secondary" (click)="closeCreate()">Hủy</button>
+      <button
+        class="btn btn-primary"
+        (click)="submitCreate()"
+        [disabled]="isSubmitting"
+      >
+        <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+        <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+        Gửi đơn
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

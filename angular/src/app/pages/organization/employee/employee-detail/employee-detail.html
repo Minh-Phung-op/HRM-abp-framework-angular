@@ -1,0 +1,288 @@
+<div class="detail-page" *ngIf="!isLoading && employee">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <p-button label="Danh sách nhân viên" icon="pi pi-arrow-left" [text]="true" severity="secondary"
+      (onClick)="goBack()" />
+    <div class="topbar-actions">
+      <ng-container *ngIf="!isEditing">
+        <p-button label="Chỉnh sửa" icon="pi pi-pencil" severity="secondary" (onClick)="startEdit()" />
+        <p-button label="Đổi trạng thái" icon="pi pi-sync" severity="secondary" (onClick)="openChangeStatus()" />
+        <p-button *ngIf="canOnboard()" label="Onboard" icon="pi pi-calendar-check" (onClick)="openOnboard()" />
+        <p-button *ngIf="canOffboard()" label="Offboard" icon="pi pi-user-minus" severity="danger"
+          (onClick)="openOffboard()" />
+      </ng-container>
+
+      <ng-container *ngIf="isEditing">
+        <p-button label="Hủy" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="cancelEdit()" />
+        <p-button label="Lưu thay đổi" icon="pi pi-check" [loading]="isSubmitting" (onClick)="submitEdit()" />
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Profile header card -->
+  <p-card styleClass="profile-header-card mb-4">
+    <div class="profile-header">
+      <p-avatar *ngIf="employee.avatarUrl" [image]="employee.avatarUrl" size="xlarge" shape="circle" />
+      <p-avatar *ngIf="!employee.avatarUrl" [label]="employee.fullName?.charAt(0)?.toUpperCase()" size="xlarge"
+        shape="circle" />
+      <div class="profile-info">
+        <h2 class="profile-name">{{ employee.fullName }}</h2>
+        <p class="profile-code text-secondary">{{ employee.employeeCode }}</p>
+        <div class="profile-meta">
+          <span class="meta-item" *ngIf="employee.positionTitle">
+            <i class="pi pi-briefcase"></i>{{ employee.positionTitle }}
+          </span>
+          <span class="meta-item" *ngIf="employee.departmentName">
+            <i class="pi pi-building"></i>{{ employee.departmentName }}
+          </span>
+          <span class="meta-item" *ngIf="employee.managerName">
+            <i class="pi pi-user"></i>Báo cáo cho: {{ employee.managerName }}
+          </span>
+        </div>
+      </div>
+      <div class="profile-status">
+        <p-tag [value]="getStatusLabel(employee.status)" [severity]="getStatusSeverity(employee.status)" />
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Detail grid -->
+  <div class="detail-grid" [formGroup]="editForm">
+
+    <!-- Personal info -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header-custom">
+          <i class="pi pi-user"></i>Thông tin cá nhân
+        </div>
+      </ng-template>
+      <div class="info-list">
+
+        <div class="info-row">
+          <span class="info-label">Họ và tên</span>
+          <span class="info-value" *ngIf="!isEditing">{{ employee.fullName || '—' }}</span>
+          <div class="info-value" *ngIf="isEditing">
+            <input pInputText formControlName="fullName" class="edit-input" />
+            <small class="p-error" *ngIf="editForm.get('fullName')?.invalid && editForm.get('fullName')?.touched">
+              Không được để trống
+            </small>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Giới tính</span>
+          <span class="info-value" *ngIf="!isEditing">{{ getGenderLabel(employee.gender) }}</span>
+          <div class="info-value" *ngIf="isEditing">
+            <p-select formControlName="gender" [options]="genderOptions" optionLabel="label" optionValue="value"
+              styleClass="edit-select" />
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Ngày sinh</span>
+          <span class="info-value" *ngIf="!isEditing">
+            {{ employee.dateOfBirth ? (employee.dateOfBirth | date:'dd/MM/yyyy') : '—' }}
+          </span>
+          <div class="info-value" *ngIf="isEditing">
+            <p-datepicker formControlName="dateOfBirth" dateFormat="dd/mm/yy" [showIcon]="true"
+              styleClass="edit-datepicker" />
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">CMND/CCCD</span>
+          <span class="info-value" *ngIf="!isEditing">{{ employee.nationalId || '—' }}</span>
+          <div class="info-value" *ngIf="isEditing">
+            <input pInputText formControlName="nationalId" class="edit-input" />
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Địa chỉ</span>
+          <span class="info-value" *ngIf="!isEditing">{{ employee.address || '—' }}</span>
+          <div class="info-value" *ngIf="isEditing">
+            <input pInputText formControlName="address" class="edit-input" />
+          </div>
+        </div>
+
+      </div>
+    </p-card>
+
+    <!-- Contact info -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header-custom">
+          <i class="pi pi-address-book"></i>Thông tin liên hệ
+        </div>
+      </ng-template>
+      <div class="info-list">
+
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value" *ngIf="!isEditing">
+            <a [href]="'mailto:' + employee.email" class="text-primary">{{ employee.email || '—' }}</a>
+          </span>
+          <div class="info-value" *ngIf="isEditing">
+            <input pInputText formControlName="email" class="edit-input" type="email" />
+            <small class="p-error" *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+              Email không hợp lệ
+            </small>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Điện thoại</span>
+          <span class="info-value" *ngIf="!isEditing">{{ employee.phone || '—' }}</span>
+          <div class="info-value" *ngIf="isEditing">
+            <input pInputText formControlName="phone" class="edit-input" />
+          </div>
+        </div>
+
+      </div>
+    </p-card>
+
+    <!-- Work info -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="card-header-custom">
+          <i class="pi pi-building"></i>Thông tin công việc
+        </div>
+      </ng-template>
+      <div class="info-list">
+
+        <div class="info-row">
+          <span class="info-label">Phòng ban</span>
+          <span class="info-value">{{ employee.departmentName || '—' }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Vị trí</span>
+          <span class="info-value">{{ employee.positionTitle || '—' }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Quản lý trực tiếp</span>
+          <span class="info-value">{{ employee.managerName || '—' }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Ngày bắt đầu</span>
+          <span class="info-value" *ngIf="!isEditing">
+            {{ employee.startDate ? (employee.startDate | date:'dd/MM/yyyy') : '—' }}
+          </span>
+          <div class="info-value" *ngIf="isEditing">
+            <p-datepicker formControlName="startDate" dateFormat="dd/mm/yy" [showIcon]="true"
+              styleClass="edit-datepicker" />
+            <small class="p-error" *ngIf="editForm.get('startDate')?.invalid && editForm.get('startDate')?.touched">
+              Không được để trống
+            </small>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Loại hợp đồng</span>
+          <span class="info-value">{{ getContractTypeLabel(employee.contractType) }}</span>
+          <!-- <div class="info-value" *ngIf="isEditing">
+            <p-select
+              formControlName="contractType"
+              [options]="contractTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="edit-select"
+            />
+          </div> -->
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Ngày kết thúc HĐ</span>
+          <span class="info-value">
+            {{ employee.contractEndDate ? (employee.contractEndDate | date:'dd/MM/yyyy') : 'Không xác định' }}
+          </span>
+          <!-- <div class="info-value" *ngIf="isEditing">
+            <p-datepicker
+              formControlName="contractEndDate"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="edit-datepicker"
+            />
+          </div> -->
+        </div>
+
+      </div>
+    </p-card>
+
+    
+  </div>
+  <!-- Contract section — thay thế card lịch sử hợp đồng cũ -->
+  <div class="full-width-section mt-6">
+    <app-contract [employeeId]="employeeId" />
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="page-loading" *ngIf="isLoading">
+  <p-progressSpinner />
+</div>
+
+<!-- DIALOG: Change Status -->
+<p-dialog header="Đổi trạng thái" [(visible)]="showChangeStatusModal" [modal]="true" [draggable]="false"
+  [resizable]="false" styleClass="w-30rem">
+  <div [formGroup]="changeStatusForm" class="dialog-body">
+    <label class="form-label">Trạng thái mới</label>
+    <p-select formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value"
+      placeholder="Chọn trạng thái" styleClass="w-full" appendTo="body" />
+    <small class="p-error" *ngIf="changeStatusForm.get('status')?.invalid && changeStatusForm.get('status')?.touched">
+      Vui lòng chọn trạng thái
+    </small>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeChangeStatus()" />
+    <p-button label="Cập nhật" [loading]="isSubmitting" [disabled]="changeStatusForm.invalid || isSubmitting"
+      (onClick)="submitChangeStatus()" />
+  </ng-template>
+</p-dialog>
+
+<!-- DIALOG: Onboard -->
+<p-dialog header="Xác nhận ngày bắt đầu làm việc" [(visible)]="showOnboardModal" [modal]="true" [draggable]="false"
+  [resizable]="false" styleClass="w-30rem">
+  <div [formGroup]="onboardForm" class="dialog-body">
+    <p class="modal-note">
+      Sau khi xác nhận, trạng thái nhân viên sẽ chuyển sang <strong>Đang làm việc</strong>.
+    </p>
+    <label class="form-label">Ngày bắt đầu làm việc <span class="required">*</span></label>
+    <p-datepicker formControlName="startDate" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" />
+    <small class="p-error" *ngIf="onboardForm.get('startDate')?.invalid && onboardForm.get('startDate')?.touched">
+      Vui lòng chọn ngày bắt đầu
+    </small>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeOnboard()" />
+    <p-button label="Xác nhận Onboard" [loading]="isSubmitting" [disabled]="onboardForm.invalid || isSubmitting"
+      (onClick)="submitOnboard()" />
+  </ng-template>
+</p-dialog>
+
+<!-- DIALOG: Offboard -->
+<p-dialog [(visible)]="showOffboardModal" [modal]="true" [draggable]="false" [resizable]="false" styleClass="w-30rem">
+  <ng-template pTemplate="header">
+    <span class="text-danger font-bold">Xác nhận Offboard</span>
+  </ng-template>
+  <div [formGroup]="offboardForm" class="dialog-body">
+    <p-message severity="warn" styleClass="w-full mb-3">
+      <ng-template pTemplate="messageicon"><i class="pi pi-exclamation-triangle"></i></ng-template>
+      Hành động này sẽ chấm dứt hợp đồng lao động của nhân viên <strong>{{ employee?.fullName }}</strong>.
+    </p-message>
+    <label class="form-label">Ngày chấm dứt <span class="required">*</span></label>
+    <p-datepicker formControlName="terminationDate" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" />
+    <small class="p-error"
+      *ngIf="offboardForm.get('terminationDate')?.invalid && offboardForm.get('terminationDate')?.touched">
+      Vui lòng chọn ngày chấm dứt
+    </small>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeOffboard()" />
+    <p-button label="Xác nhận Offboard" severity="danger" [loading]="isSubmitting"
+      [disabled]="offboardForm.invalid || isSubmitting" (onClick)="submitOffboard()" />
+  </ng-template>
+</p-dialog>

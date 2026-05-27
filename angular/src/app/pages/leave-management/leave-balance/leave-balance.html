@@ -1,0 +1,303 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="lb-page">
+
+  <!-- ===== Page header ===== -->
+  <div class="lb-header">
+    <div>
+      <h1 class="lb-title">Quản lý số dư nghỉ phép</h1>
+      <p class="lb-subtitle">{{ totalCount() }} bản ghi</p>
+    </div>
+    <div class="lb-header-actions">
+      <p-button label="Khởi tạo hàng loạt" icon="pi pi-bolt" severity="secondary" (onClick)="openBulkInit()" />
+      <p-button label="Thêm mới" icon="pi pi-plus" (onClick)="openCreate()" />
+    </div>
+  </div>
+
+  <!-- ===== Filter bar ===== -->
+  <div class="lb-filter" [formGroup]="filterForm">
+    <div class="filter-row">
+
+      <div class="filter-field filter-field--wide">
+        <label>Tìm kiếm</label>
+        <p-iconfield>
+          <p-inputicon class="pi pi-search" />
+          <input pInputText formControlName="keyword" placeholder="Tên, mã nhân viên..."
+            (keyup.enter)="onFilterChange()" />
+        </p-iconfield>
+      </div>
+
+      <div class="filter-field">
+        <label>Loại nghỉ phép</label>
+        <p-select formControlName="leaveTypeId" [options]="leaveTypes()" optionLabel="name" optionValue="id"
+          placeholder="Tất cả" [showClear]="true" (onChange)="onFilterChange()" styleClass="w-full" />
+      </div>
+
+      <div class="filter-field">
+        <label>Năm</label>
+        <p-select formControlName="year" [options]="yearOptions" optionLabel="label" optionValue="value"
+          (onChange)="onFilterChange()" styleClass="w-full" />
+      </div>
+
+      <div class="filter-field filter-field--action">
+        <p-button icon="pi pi-filter-slash" label="Xóa bộ lọc" severity="secondary" [text]="true"
+          (onClick)="resetFilter()" />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Table ===== -->
+  <div class="lb-table-wrap">
+    <p-table [value]="balances()" [lazy]="true" (onLazyLoad)="loadBalances($event)" [paginator]="true" [rows]="rows"
+      [first]="first" [totalRecords]="totalCount()" [loading]="isLoading()" [stripedRows]="true" [rowHover]="true"
+      responsiveLayout="scroll" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="min-width: 180px">Nhân viên</th>
+          <th style="min-width: 140px">Loại nghỉ phép</th>
+          <th style="width: 80px; text-align: center">Năm</th>
+          <th style="width: 100px; text-align: right">Được cấp</th>
+          <th style="width: 100px; text-align: right">Chuyển kỳ</th>
+          <th style="width: 100px; text-align: right">Tổng</th>
+          <th style="width: 100px; text-align: right">Đã dùng</th>
+          <th style="width: 100px; text-align: right">Chờ duyệt</th>
+          <th style="width: 100px; text-align: right">Còn lại</th>
+          <th style="min-width: 160px">Tiến độ sử dụng</th>
+          <th style="width: 120px; text-align: center">Thao tác</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-b>
+        <tr>
+          <!-- Nhân viên -->
+          <td>
+            <div class="emp-cell">
+              <span class="emp-name">{{ b.employeeName }}</span>
+              <span class="emp-code">{{ b.employeeCode }}</span>
+            </div>
+          </td>
+
+          <!-- Loại -->
+          <td>
+            <p-tag [value]="b.leaveTypeName" severity="info" />
+          </td>
+
+          <!-- Năm -->
+          <td class="text-center font-semibold">{{ b.year }}</td>
+
+          <!-- Số ngày -->
+          <td class="text-right">{{ b.allocatedDays ?? '—' }}</td>
+          <td class="text-right">{{ b.carriedOverDays ?? '—' }}</td>
+          <td class="text-right font-semibold">{{ b.totalDays ?? '—' }}</td>
+          <td class="text-right text-orange-600">{{ b.usedDays ?? 0 }}</td>
+          <td class="text-right text-blue-600">{{ b.pendingDays ?? 0 }}</td>
+
+          <!-- Còn lại -->
+          <td class="text-right">
+            <span class="remaining-badge" [class.remaining-badge--low]="(b.remainingDays ?? 0) <= 2"
+              [class.remaining-badge--ok]="(b.remainingDays ?? 0) > 2">
+              {{ b.remainingDays ?? '—' }}
+            </span>
+          </td>
+
+          <!-- Progress -->
+          <td>
+            <div class="progress-wrap">
+              <p-progressbar [value]="getUsedPercent(b)" [style]="{ height: '6px' }" [showValue]="false"
+                [styleClass]="'progress-' + getProgressSeverity(getUsedPercent(b))" />
+              <span class="progress-label">{{ getUsedPercent(b) }}%</span>
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td class="text-center">
+            <div class="action-group">
+              <p-button icon="pi pi-pencil" [text]="true" severity="secondary" size="small" pTooltip="Chỉnh sửa"
+                (onClick)="openEdit(b)" />
+              <p-button icon="pi pi-sliders-h" [text]="true" severity="info" size="small" pTooltip="Điều chỉnh số ngày"
+                (onClick)="openAdjust(b)" />
+              <p-button icon="pi pi-refresh" [text]="true" severity="warn" size="small" pTooltip="Tính lại số dư"
+                (onClick)="confirmRecalculate(b)" />
+              <p-button icon="pi pi-trash" [text]="true" severity="danger" size="small" pTooltip="Xóa"
+                (onClick)="confirmDelete(b)" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="11" class="empty-row">
+            <i class="pi pi-inbox"></i>
+            <p>Không có dữ liệu số dư nghỉ phép</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+
+<!-- ===== DIALOG: Create / Edit ===== -->
+<p-dialog [header]="isEditMode() ? 'Chỉnh sửa số dư nghỉ phép' : 'Thêm số dư nghỉ phép'" [(visible)]="showFormDialog"
+  [modal]="true" [draggable]="false" [resizable]="false" [style]="{ width: '520px' }" (onHide)="closeFormDialog()">
+  <div [formGroup]="balanceForm" class="form-grid">
+
+    <!-- Nhân viên (chỉ hiện khi create, edit thì readonly) -->
+    <div class="form-field form-field--full" *ngIf="!isEditMode()">
+      <label class="form-label">Nhân viên <span class="required">*</span></label>
+      <p-inputnumber formControlName="employeeId" placeholder="Nhập ID nhân viên" styleClass="w-full"
+        inputStyleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(balanceForm, 'employeeId') }" />
+      <small class="p-error" *ngIf="isInvalid(balanceForm, 'employeeId')">
+        {{ getError(balanceForm, 'employeeId') }}
+      </small>
+      <small class="form-hint">
+        Nhập Employee ID. Nên thay bằng autocomplete nhân viên nếu có service.
+      </small>
+    </div>
+
+    <!-- Loại nghỉ phép -->
+    <div class="form-field">
+      <label class="form-label">Loại nghỉ phép <span class="required">*</span></label>
+      <p-select formControlName="leaveTypeId" [options]="leaveTypes()" optionLabel="name" optionValue="id"
+        placeholder="Chọn loại nghỉ phép" styleClass="w-full"
+        [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(balanceForm, 'leaveTypeId') }" />
+      <small class="p-error" *ngIf="isInvalid(balanceForm, 'leaveTypeId')">
+        {{ getError(balanceForm, 'leaveTypeId') }}
+      </small>
+    </div>
+
+    <!-- Năm -->
+    <div class="form-field">
+      <label class="form-label">Năm <span class="required">*</span></label>
+      <p-select formControlName="year" [options]="yearOptions" optionLabel="label" optionValue="value"
+        styleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(balanceForm, 'year') }" />
+      <small class="p-error" *ngIf="isInvalid(balanceForm, 'year')">
+        {{ getError(balanceForm, 'year') }}
+      </small>
+    </div>
+
+    <!-- Số ngày được cấp -->
+    <div class="form-field">
+      <label class="form-label">Số ngày được cấp</label>
+      <p-inputnumber formControlName="allocatedDays" [min]="0" [max]="365" [showButtons]="true" styleClass="w-full"
+        inputStyleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(balanceForm, 'allocatedDays') }" />
+      <small class="p-error" *ngIf="isInvalid(balanceForm, 'allocatedDays')">
+        {{ getError(balanceForm, 'allocatedDays') }}
+      </small>
+    </div>
+
+    <!-- Số ngày chuyển kỳ -->
+    <div class="form-field">
+      <label class="form-label">Số ngày chuyển kỳ</label>
+      <p-inputnumber formControlName="carriedOverDays" [min]="0" [max]="365" [showButtons]="true" styleClass="w-full"
+        inputStyleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(balanceForm, 'carriedOverDays') }" />
+      <small class="p-error" *ngIf="isInvalid(balanceForm, 'carriedOverDays')">
+        {{ getError(balanceForm, 'carriedOverDays') }}
+      </small>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeFormDialog()" />
+    <p-button [label]="isEditMode() ? 'Cập nhật' : 'Lưu'" icon="pi pi-check" [loading]="isSubmitting()"
+      (onClick)="save()" />
+  </ng-template>
+</p-dialog>
+
+
+<!-- ===== DIALOG: Adjust Balance ===== -->
+<p-dialog header="Điều chỉnh số dư nghỉ phép" [(visible)]="showAdjustDialog" [modal]="true" [draggable]="false"
+  [resizable]="false" [style]="{ width: '420px' }" (onHide)="closeAdjustDialog()">
+  <div class="adjust-info" *ngIf="adjustingBalance()">
+    <div class="adjust-info__row">
+      <span>Nhân viên</span>
+      <strong>{{ adjustingBalance()!.employeeName }}</strong>
+    </div>
+    <div class="adjust-info__row">
+      <span>Loại nghỉ phép</span>
+      <strong>{{ adjustingBalance()!.leaveTypeName }}</strong>
+    </div>
+    <div class="adjust-info__row">
+      <span>Số ngày hiện tại</span>
+      <strong class="text-primary">{{ adjustingBalance()!.remainingDays ?? 0 }} ngày còn lại</strong>
+    </div>
+  </div>
+
+  <p-divider />
+
+  <div [formGroup]="adjustForm" class="form-grid">
+    <div class="form-field form-field--full">
+      <label class="form-label">
+        Số ngày điều chỉnh <span class="required">*</span>
+      </label>
+      <p-inputnumber formControlName="adjustmentDays" [showButtons]="true" [min]="-365" [max]="365" styleClass="w-full"
+        inputStyleClass="w-full" placeholder="Dương = cộng thêm, Âm = trừ bớt"
+        [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(adjustForm, 'adjustmentDays') }" />
+      <small class="p-error" *ngIf="isInvalid(adjustForm, 'adjustmentDays')">
+        {{ getError(adjustForm, 'adjustmentDays') }}
+      </small>
+      <small class="form-hint">
+        Nhập số dương để cộng thêm ngày, số âm để trừ bớt ngày.
+      </small>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeAdjustDialog()" />
+    <p-button label="Xác nhận điều chỉnh" icon="pi pi-check" [loading]="isSubmitting()" (onClick)="submitAdjust()" />
+  </ng-template>
+</p-dialog>
+
+
+<!-- ===== DIALOG: Bulk Initialize ===== -->
+<p-dialog header="Khởi tạo số dư hàng loạt" [(visible)]="showBulkInitDialog" [modal]="true" [draggable]="false"
+  [resizable]="false" [style]="{ width: '460px' }" (onHide)="closeBulkInitDialog()">
+  <p class="bulk-note">
+    <i class="pi pi-info-circle"></i>
+    Tự động tạo số dư nghỉ phép cho <strong>toàn bộ nhân viên đang làm việc</strong>
+    theo loại nghỉ phép và năm được chọn.
+  </p>
+
+  <div [formGroup]="bulkInitForm" class="form-grid">
+
+    <div class="form-field form-field--full">
+      <label class="form-label">Loại nghỉ phép <span class="required">*</span></label>
+      <p-select formControlName="leaveTypeId" [options]="leaveTypes()" optionLabel="name" optionValue="id"
+        placeholder="Chọn loại nghỉ phép" styleClass="w-full" appendTo="body"
+        [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(bulkInitForm, 'leaveTypeId') }" />
+      <small class="p-error" *ngIf="isInvalid(bulkInitForm, 'leaveTypeId')">
+        {{ getError(bulkInitForm, 'leaveTypeId') }}
+      </small>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Năm <span class="required">*</span></label>
+      <p-select formControlName="year" [options]="yearOptions" optionLabel="label" optionValue="value"
+        styleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(bulkInitForm, 'year') }" />
+      <small class="p-error" *ngIf="isInvalid(bulkInitForm, 'year')">
+        {{ getError(bulkInitForm, 'year') }}
+      </small>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Số ngày mặc định</label>
+      <p-inputnumber formControlName="defaultDays" [min]="0" [max]="365" [showButtons]="true" styleClass="w-full"
+        inputStyleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid(bulkInitForm, 'defaultDays') }" />
+      <small class="p-error" *ngIf="isInvalid(bulkInitForm, 'defaultDays')">
+        {{ getError(bulkInitForm, 'defaultDays') }}
+      </small>
+      <small class="form-hint">Để trống nếu dùng số ngày mặc định từ cấu hình loại nghỉ.</small>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeBulkInitDialog()" />
+    <p-button label="Khởi tạo" icon="pi pi-bolt" [loading]="isSubmitting()" (onClick)="submitBulkInit()" />
+  </ng-template>
+</p-dialog>

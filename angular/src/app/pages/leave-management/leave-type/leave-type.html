@@ -1,0 +1,290 @@
+<p-toast position="top-right" />
+<p-confirmDialog />
+
+<div class="lb-page">
+
+  <!-- ===== Header ===== -->
+  <div class="lb-header">
+    <div>
+      <h1 class="lb-title">Loại nghỉ phép</h1>
+      <p class="lb-subtitle">{{ totalCount }} loại nghỉ phép trong hệ thống</p>
+    </div>
+    <p-button label="Thêm loại phép" icon="pi pi-plus" (onClick)="openCreate()" />
+  </div>
+
+  <!-- ===== Filter ===== -->
+  <div class="lb-filter" [formGroup]="filterForm">
+    <div class="filter-row">
+
+      <div class="filter-field filter-field--wide">
+        <label>Tìm kiếm</label>
+        <p-iconfield>
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            formControlName="keyword"
+            placeholder="Tên, mã loại phép..."
+            (keyup.enter)="onFilterChange()"
+          />
+        </p-iconfield>
+      </div>
+
+      <div class="filter-field">
+        <label>Hưởng lương</label>
+        <p-selectbutton
+          formControlName="paid"
+          [options]="triStateOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label>Chuyển kỳ</label>
+        <p-selectbutton
+          formControlName="carryOver"
+          [options]="triStateOptions"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+
+      <div class="filter-field filter-field--action">
+        <p-button
+          icon="pi pi-filter-slash"
+          label="Xóa bộ lọc"
+          severity="secondary"
+          [text]="true"
+          (onClick)="resetFilter()"
+        />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Table ===== -->
+  <div class="lb-table-wrap">
+    <p-table
+      [value]="leaveTypes"
+      [loading]="isLoading"
+      styleClass="p-datatable-sm p-datatable-striped"
+      [tableStyle]="{ 'min-width': '700px' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="min-width: 220px">Loại nghỉ phép</th>
+          <th style="width: 140px">Mã</th>
+          <th style="width: 140px; text-align: center">Số ngày / năm</th>
+          <th style="width: 130px; text-align: center">Hưởng lương</th>
+          <th style="width: 120px; text-align: center">Chuyển kỳ</th>
+          <th style="width: 140px; text-align: center">Tối đa chuyển</th>
+          <th style="width: 64px"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-lt>
+        <tr>
+          <!-- Tên -->
+          <td>
+            <div class="lt-name-cell">
+              <div class="lt-icon" [class.lt-icon--paid]="lt.paid" [class.lt-icon--unpaid]="!lt.paid">
+                <i [class]="lt.paid ? 'pi pi-sun' : 'pi pi-cloud'"></i>
+              </div>
+              <span class="lt-name">{{ lt.name }}</span>
+            </div>
+          </td>
+
+          <!-- Mã -->
+          <td>
+            <p-tag [value]="lt.code" severity="secondary" styleClass="lt-code-tag" />
+          </td>
+
+          <!-- Ngày/năm -->
+          <td class="text-center">
+            <span *ngIf="lt.defaultDaysPerYear != null" class="day-badge">
+              {{ lt.defaultDaysPerYear }} ngày
+            </span>
+            <span *ngIf="lt.defaultDaysPerYear == null" class="text-muted">—</span>
+          </td>
+
+          <!-- Hưởng lương -->
+          <td class="text-center">
+            <p-tag
+              [value]="lt.paid ? 'Có' : 'Không'"
+              [severity]="lt.paid ? 'success' : 'secondary'"
+              [icon]="lt.paid ? 'pi pi-check' : 'pi pi-times'"
+            />
+          </td>
+
+          <!-- Chuyển kỳ -->
+          <td class="text-center">
+            <p-tag
+              [value]="lt.carryOver ? 'Có' : 'Không'"
+              [severity]="lt.carryOver ? 'success' : 'secondary'"
+              [icon]="lt.carryOver ? 'pi pi-check' : 'pi pi-times'"
+            />
+          </td>
+
+          <!-- Tối đa chuyển -->
+          <td class="text-center">
+            <span *ngIf="lt.carryOver && lt.maxCarryDays != null" class="day-badge day-badge--green">
+              {{ lt.maxCarryDays }} ngày
+            </span>
+            <span *ngIf="!lt.carryOver || lt.maxCarryDays == null" class="text-muted">—</span>
+          </td>
+
+          <!-- Action -->
+          <td class="text-center">
+            <p-button
+              icon="pi pi-ellipsis-v"
+              [text]="true"
+              severity="secondary"
+              size="small"
+              (onClick)="menu.toggle($event)"
+            />
+            <p-menu #menu [popup]="true" [model]="getMenuItems(lt)" appendTo="body" />
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="empty-row">
+              <i class="pi pi-calendar-times"></i>
+              <p>Chưa có loại nghỉ phép nào</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="loadingbody">
+        <tr *ngFor="let i of [1,2,3,4,5]">
+          <td *ngFor="let j of [1,2,3,4,5,6,7]">
+            <p-skeleton height="1.2rem" />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-paginator
+    *ngIf="totalCount > pageSize"
+    [rows]="pageSize"
+    [totalRecords]="totalCount"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    (onPageChange)="onPageChange($event)"
+    styleClass="mt-3 border-none p-0"
+  />
+
+</div>
+
+
+<!-- ===== DIALOG: Create / Edit ===== -->
+<p-dialog
+  [(visible)]="showFormModal"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '500px' }"
+  [header]="isEditMode ? 'Chỉnh sửa loại phép' : 'Thêm loại nghỉ phép'"
+  (onHide)="closeFormModal()"
+>
+  <div [formGroup]="leaveTypeForm" class="form-grid-single">
+
+    <!-- Tên -->
+    <div class="form-field">
+      <label class="form-label">Tên loại phép <span class="required">*</span></label>
+      <input
+        pInputText
+        formControlName="name"
+        placeholder="VD: Nghỉ phép năm"
+        [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('name') }"
+      />
+      <small class="p-error" *ngIf="isFieldInvalid('name')">{{ getFieldError('name') }}</small>
+    </div>
+
+    <!-- Mã -->
+    <div class="form-field">
+      <label class="form-label">
+        Mã loại phép <span class="required">*</span>
+        <span class="form-hint-inline">(chữ in hoa, số, dấu _)</span>
+      </label>
+      <input
+        pInputText
+        formControlName="code"
+        placeholder="VD: ANNUAL_LEAVE"
+        [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('code') }"
+        style="font-family: monospace; letter-spacing: 0.03em"
+      />
+      <small class="p-error" *ngIf="isFieldInvalid('code')">{{ getFieldError('code') }}</small>
+    </div>
+
+    <!-- Số ngày / năm -->
+    <div class="form-field">
+      <label class="form-label">Số ngày mặc định / năm</label>
+      <p-inputnumber
+        formControlName="defaultDaysPerYear"
+        placeholder="VD: 12"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [min]="0" [max]="365"
+        suffix=" ngày"
+        [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('defaultDaysPerYear') }"
+      />
+      <small class="p-error" *ngIf="isFieldInvalid('defaultDaysPerYear')">
+        {{ getFieldError('defaultDaysPerYear') }}
+      </small>
+    </div>
+
+    <!-- Toggles -->
+    <div class="toggle-block">
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-title">Hưởng lương</span>
+          <span class="toggle-desc">Nhân viên được hưởng lương khi nghỉ</span>
+        </div>
+        <p-toggleswitch formControlName="paid" />
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-title">Cho phép chuyển kỳ</span>
+          <span class="toggle-desc">Ngày còn dư được chuyển sang năm sau</span>
+        </div>
+        <p-toggleswitch formControlName="carryOver" />
+      </div>
+
+    </div>
+
+    <!-- Max carry days — slide in khi carryOver = true -->
+    <div class="carry-field" [class.carry-field--visible]="carryOverEnabled">
+      <label class="form-label">Số ngày chuyển tối đa <span class="required">*</span></label>
+      <p-inputnumber
+        formControlName="maxCarryDays"
+        placeholder="VD: 5"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [min]="0"
+        suffix=" ngày"
+        [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('maxCarryDays') }"
+      />
+      <small class="p-error" *ngIf="isFieldInvalid('maxCarryDays')">
+        {{ getFieldError('maxCarryDays') }}
+      </small>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeFormModal()" />
+    <p-button
+      [label]="isEditMode ? 'Lưu thay đổi' : 'Tạo mới'"
+      icon="pi pi-check"
+      [loading]="isSubmitting"
+      (onClick)="submitForm()"
+    />
+  </ng-template>
+</p-dialog>

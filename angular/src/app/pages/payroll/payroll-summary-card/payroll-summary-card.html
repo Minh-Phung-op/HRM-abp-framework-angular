@@ -1,0 +1,31 @@
+<div class="summary-strip">
+    <div class="summary-item summary-item--main">
+        <span class="summary-label">Tổng quỹ lương (Net)</span>
+        <span class="summary-value summary-value--large">{{ fmt(stats.totalNet) }}</span>
+        <span class="summary-sub">Gross: {{ fmt(stats.totalGross) }}</span>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-item">
+        <span class="summary-label">Thuế TNCN</span>
+        <span class="summary-value summary-value--red">{{ fmt(stats.totalPit) }}</span>
+        <span class="summary-sub">Phải nộp</span>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-item">
+        <span class="summary-label">Bảo hiểm NLĐ</span>
+        <span class="summary-value summary-value--orange">{{ fmt(stats.totalBhxh) }}</span>
+        <span class="summary-sub">BHXH nhân viên đóng</span>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-item">
+        <span class="summary-label">Lương bình quân</span>
+        <span class="summary-value">{{ fmt(stats.avgNet) }}</span>
+        <span class="summary-sub">{{ stats.totalCount }} nhân viên</span>
+    </div>
+</div>

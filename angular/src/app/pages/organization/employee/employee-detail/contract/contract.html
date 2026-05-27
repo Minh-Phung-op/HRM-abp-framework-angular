@@ -1,0 +1,289 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="contract-page w-full">
+
+  <!-- Header -->
+  <div class="section-header flex align-items-center justify-content-between mb-4">
+    <div>
+      <h3 class="section-title">
+        <i class="pi pi-file-edit"></i>
+        Hợp đồng lao động
+      </h3>
+      <span class="section-subtitle">{{ contracts().length }} hợp đồng</span>
+    </div>
+    <p-button
+      label="Thêm hợp đồng"
+      icon="pi pi-plus"
+      (onClick)="openCreate()"
+    />
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" *ngIf="isLoading()">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-wrap" *ngIf="!isLoading() && contracts().length === 0">
+    <p-empty
+      description="Chưa có hợp đồng nào. Nhấn &quot;Thêm hợp đồng&quot; để tạo mới."
+    >
+      <ng-template pTemplate="icon">
+        <i class="pi pi-file-edit" style="font-size: 3rem; color: var(--p-text-muted-color)"></i>
+      </ng-template>
+    </p-empty>
+  </div>
+
+  <!-- Contract cards grid -->
+  <div class="contract-grid" *ngIf="!isLoading() && contracts().length > 0">
+    <div class="contract-card" *ngFor="let c of contracts()">
+
+      <!-- Card header -->
+      <div class="contract-card__header">
+        <div class="contract-card__title-group">
+          <i [class]="getContractTypeIcon(c.contractType)" class="contract-card__type-icon"></i>
+          <div>
+            <span class="contract-card__number">{{ c.contractNumber }}</span>
+            <span class="contract-card__type">{{ getContractTypeLabel(c.contractType) }}</span>
+          </div>
+        </div>
+        <div class="contract-card__header-right">
+          <p-tag
+            [value]="getStatusLabel(c.status)"
+            [severity]="getStatusSeverity(c.status)"
+          />
+          <div class="contract-card__actions">
+            <p-button
+              icon="pi pi-pencil"
+              [text]="true"
+              severity="secondary"
+              size="small"
+              pTooltip="Chỉnh sửa"
+              (onClick)="openEdit(c)"
+            />
+            <p-button
+              icon="pi pi-trash"
+              [text]="true"
+              severity="danger"
+              size="small"
+              pTooltip="Xóa"
+              (onClick)="confirmDelete(c)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="my-2" />
+
+      <!-- Card body -->
+      <div class="contract-card__body">
+
+        <!-- Dates row -->
+        <div class="info-group">
+          <div class="info-item">
+            <span class="info-label"><i class="pi pi-pen-to-square"></i> Ngày ký</span>
+            <span class="info-value">{{ formatDate(c.signDate) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="pi pi-calendar"></i> Ngày bắt đầu</span>
+            <span class="info-value">{{ formatDate(c.startDate) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="pi pi-calendar-times"></i> Ngày kết thúc</span>
+            <span class="info-value" [class.text-muted]="!c.endDate">
+              {{ c.endDate ? formatDate(c.endDate) : 'Không xác định' }}
+            </span>
+          </div>
+        </div>
+
+        <p-divider styleClass="my-2" />
+
+        <!-- Salary row -->
+        <div class="info-group">
+          <div class="info-item info-item--highlight">
+            <span class="info-label"><i class="pi pi-wallet"></i> Lương cơ bản</span>
+            <span class="info-value info-value--salary">{{ formatCurrency(c.basicSalary) }}</span>
+          </div>
+          <div class="info-item info-item--highlight">
+            <span class="info-label"><i class="pi pi-shield"></i> Lương bảo hiểm</span>
+            <span class="info-value info-value--salary">{{ formatCurrency(c.insuranceSalary) }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ======= DIALOG: Tạo / Chỉnh sửa ======= -->
+<p-dialog
+  [header]="isEditMode() ? 'Chỉnh sửa hợp đồng' : 'Thêm hợp đồng mới'"
+  [(visible)]="showFormDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '640px' }"
+  (onHide)="closeDialog()"
+>
+  <div [formGroup]="contractForm" class="form-grid flex flex-column gap-3">
+
+    <!-- Số hợp đồng -->
+    <div class="form-field form-field--full flex flex-column ">
+      <label class="form-label">Số hợp đồng <span class="text-red-500">*</span></label>
+      <input
+        pInputText
+        formControlName="contractNumber"
+        placeholder="VD: HĐ-2025-001"
+        [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('contractNumber') }"
+      />
+      <small class="p-error text-danger" *ngIf="isInvalid('contractNumber')">
+        {{ getError('contractNumber') }}
+      </small>
+    </div>
+
+    <div class="grid">
+        <!-- Loại hợp đồng -->
+        <div class="form-field col-6">
+          <label class="form-label">Loại hợp đồng <span class="text-red-500">*</span></label>
+          <p-select
+            formControlName="contractType"
+            [options]="contractTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Chọn loại hợp đồng"
+            styleClass="w-full"
+            [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('contractType') }"
+          />
+          <small class="p-error text-danger" *ngIf="isInvalid('contractType')">
+            {{ getError('contractType') }}
+          </small>
+        </div>
+    
+        <!-- Trạng thái -->
+        <div class="form-field col-6">
+          <label class="form-label">Trạng thái <span class="text-red-500">*</span></label>
+          <p-select
+            formControlName="status"
+            [options]="contractStatusOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Chọn trạng thái"
+            styleClass="w-full"
+            [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('status') }"
+          />
+          <small class="p-error text-danger" *ngIf="isInvalid('status')">
+            {{ getError('status') }}
+          </small>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Ngày ký -->
+        <div class="form-field col-6">
+          <label class="form-label">Ngày ký <span class="text-red-500">*</span></label>
+          <p-datepicker
+            formControlName="signDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            appendTo="body"
+            dataType="date"
+            styleClass="w-full"
+            [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('signDate') }"
+          />
+          <small class="p-error text-danger" *ngIf="isInvalid('signDate')">
+            {{ getError('signDate') }}
+          </small>
+        </div>
+    
+        <!-- Ngày bắt đầu -->
+        <div class="form-field col-6">
+          <label class="form-label">Ngày bắt đầu <span class="text-red-500">*</span></label>
+          <p-datepicker
+            formControlName="startDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            appendTo="body"
+            dataType="date"
+            styleClass="w-full"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldOrFormInvalid('startDate') }"
+          />
+          <small class="p-error text-danger" *ngIf="isFieldOrFormInvalid('startDate')">
+            {{ getError('startDate') }}
+          </small>
+        </div>
+    </div>
+
+    <!-- Ngày kết thúc -->
+    <div class="form-field">
+      <label class="form-label">Ngày kết thúc</label>
+      <p-datepicker
+        formControlName="endDate"
+        dateFormat="dd/mm/yy"
+        [showIcon]="true"
+        appendTo="body"
+        dataType="date"
+        styleClass="w-full"
+        [ngClass]="{ 'ng-invalid ng-dirty': isFieldOrFormInvalid('endDate') }"
+      />
+      <small class="p-error" *ngIf="isFieldOrFormInvalid('endDate')">
+        {{ getError('endDate') }}
+      </small>
+      <small class="form-hint text-secondary" *ngIf="!isFieldOrFormInvalid('endDate')">
+        Để trống nếu hợp đồng không xác định thời hạn
+      </small>
+    </div>
+
+    <div class="grid">
+        <!-- Lương cơ bản -->
+        <div class="form-field col-6">
+          <label class="form-label">Lương cơ bản (VNĐ)</label>
+          <p-inputnumber
+            formControlName="basicSalary"
+            [useGrouping]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            placeholder="VD: 15,000,000"
+            [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('basicSalary') }"
+          />
+          <small class="p-error" *ngIf="isInvalid('basicSalary')">
+            {{ getError('basicSalary') }}
+          </small>
+        </div>
+    
+        <!-- Lương bảo hiểm -->
+        <div class="form-field col-6">
+          <label class="form-label">Lương bảo hiểm (VNĐ)</label>
+          <p-inputnumber
+            formControlName="insuranceSalary"
+            [useGrouping]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            placeholder="VD: 10,000,000"
+            [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('insuranceSalary') }"
+          />
+          <small class="p-error" *ngIf="isInvalid('insuranceSalary')">
+            {{ getError('insuranceSalary') }}
+          </small>
+        </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Hủy"
+      icon="pi pi-times"
+      severity="secondary"
+      [text]="true"
+      (onClick)="closeDialog()"
+    />
+    <p-button
+      [label]="isEditMode() ? 'Cập nhật' : 'Lưu hợp đồng'"
+      icon="pi pi-check"
+      [loading]="isSubmitting()"
+      (onClick)="save()"
+    />
+  </ng-template>
+</p-dialog>

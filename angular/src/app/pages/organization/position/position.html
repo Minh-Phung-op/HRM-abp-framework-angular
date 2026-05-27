@@ -1,0 +1,123 @@
+<p-toast></p-toast>
+
+<div class="p-4 bg-slate-50 min-h-screen">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="text-2xl font-bold m-0 text-slate-800">Danh mục Vị trí</h1>
+      <p class="text-slate-500 m-0">Quản lý các chức danh và cấp bậc trong tổ chức</p>
+    </div>
+    <p-button label="Thêm vị trí" icon="pi pi-plus" (onClick)="openCreate()"></p-button>
+  </div>
+
+  <div class="bg-white p-4 border-round-xl shadow-sm mb-4 border-1 border-slate-200" [formGroup]="filterForm">
+    <div class="grid p-fluid">
+      <div class="col-12 md:col-4">
+        <label class="block mb-2 font-semibold text-sm">Tìm kiếm</label>
+        <p-iconfield>
+          <p-inputicon class="pi pi-search"></p-inputicon>
+          <input pInputText type="text" formControlName="keyword" placeholder="Tên vị trí, cấp bậc..."
+            (keyup.enter)="onFilter()" />
+        </p-iconfield>
+      </div>
+      <div class="col-12 md:col-3">
+        <label class="block mb-2 font-semibold text-sm">Phòng ban</label>
+        <p-select [options]="departments()" optionLabel="name" optionValue="id" formControlName="departmentId"
+          [showClear]="true" placeholder="Tất cả phòng ban" (onChange)="onFilter()" appendTo="body">
+        </p-select>
+      </div>
+      <div class="col-12 md:col-3">
+        <label class="block mb-2 font-semibold text-sm">Trạng thái</label>
+        <p-select [options]="activeOptions" formControlName="isActive" (onChange)="onFilter()"></p-select>
+      </div>
+      <div class="col-12 md:col-2 flex align-items-end">
+        <p-button icon="pi pi-filter-slash" severity="secondary" [text]="true" label="Xóa lọc"
+          (onClick)="resetFilter()"></p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border-round-xl shadow-sm border-1 border-slate-200 overflow-hidden">
+    <p-table [value]="positions()" [lazy]="true" (onLazyLoad)="loadPositions($event)" [paginator]="true" [rows]="rows"
+      [totalRecords]="totalCount()" [loading]="isLoading()" [stripedRows]="true" [tableStyle]="{'min-width': '60rem'}">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Tên vị trí</th>
+          <th>Cấp bậc</th>
+          <th>Phòng ban</th>
+          <th class="text-center">Trạng thái</th>
+          <th style="width: 5rem"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-pos>
+        <tr>
+          <td class="font-bold text-slate-700">{{ pos.title }}</td>
+          <td>
+            <p-tag [value]="pos.level || '—'" severity="info"></p-tag>
+          </td>
+          <td>{{ pos.departmentName || '—' }}</td>
+          <td class="text-center">
+            <span [class]="'active-badge ' + (pos.isActive ? 'active-badge--on' : 'active-badge--off')">
+              <span class="dot"></span>
+              {{ pos.isActive ? 'Đang hoạt động' : 'Tạm dừng' }}
+            </span>
+          </td>
+          <td>
+            <p-button icon="pi pi-ellipsis-v" severity="secondary" [text]="true"
+              (onClick)="menu.toggle($event)"></p-button>
+            <p-menu #menu [popup]="true" [model]="getActionMenu(pos)" appendTo="body"></p-menu>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center p-5 text-slate-400">
+            <i class="pi pi-briefcase block mb-2 text-4xl"></i>
+            <p>Không tìm thấy dữ liệu vị trí nào</p>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<p-dialog [(visible)]="showFormModal" [header]="isEditMode ? 'Chỉnh sửa vị trí' : 'Thêm vị trí mới'" [modal]="true"
+  [style]="{width: '500px'}" [draggable]="false" [resizable]="false" class="p-fluid">
+
+  <ng-template pTemplate="content">
+    <div [formGroup]="positionForm" class="flex flex-column gap-3 mt-2">
+      <div class="field">
+        <label class="font-semibold block mb-1">Tên vị trí <span class="text-red-500">*</span></label>
+        <input pInputText formControlName="title" placeholder="VD: Senior Developer" />
+      </div>
+
+      <div class="grid">
+        <div class="col-6 field">
+          <label class="font-semibold block mb-1">Cấp bậc</label>
+          <input pInputText formControlName="level" placeholder="VD: Senior" />
+        </div>
+        <div class="col-6 field">
+          <label class="font-semibold block mb-1">Phòng ban <span class="text-red-500">*</span></label>
+          <p-select [options]="departments()" optionLabel="name" optionValue="id" formControlName="departmentId"
+            placeholder="Chọn phòng ban" appendTo="body">
+          </p-select>
+        </div>
+      </div>
+
+      <div class="flex align-items-center gap-3 py-2 border-1 border-slate-100 border-round-md px-3 bg-slate-50">
+        <p-toggleswitch formControlName="isActive"></p-toggleswitch>
+        <span class="text-sm font-medium">Trạng thái hoạt động</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Hủy" icon="pi pi-times" severity="secondary" [text]="true"
+      (onClick)="showFormModal = false"></p-button>
+    <p-button label="Lưu thông tin" icon="pi pi-check" (onClick)="submitForm()" [loading]="isSubmitting"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

@@ -1,0 +1,205 @@
+// Styles riêng của component — dùng PrimeNG components cho button, modal, spinner...
+// Chỉ cần viết layout và override tối thiểu
+
+.detail-page {
+  padding: 24px 32px;
+  min-height: 100vh;
+}
+
+// ---- Topbar ----
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+// ---- Profile header ----
+:host ::ng-deep .profile-header-card .p-card-body {
+  padding: 28px 32px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-info { flex: 1; }
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.profile-code {
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-color-secondary);
+
+  i { font-size: 12px; }
+}
+
+.profile-status { flex-shrink: 0; }
+
+// ---- Detail grid ----
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 768px)  { grid-template-columns: 1fr; }
+}
+
+:host ::ng-deep .full-width-card {
+  grid-column: 1 / -1;
+}
+
+// ---- Card custom header ----
+.card-header-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-ground);
+  width: 100%;
+
+  i {
+    color: var(--primary-color);
+    font-size: 13px;
+  }
+}
+
+:host ::ng-deep p-card .p-card-header {
+  padding: 0;
+}
+
+:host ::ng-deep p-card .p-card-body {
+  padding: 0;
+}
+
+:host ::ng-deep p-card .p-card-content {
+  padding: 16px 20px;
+}
+
+// ---- Info rows ----
+.info-list { padding: 4px 0; }
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--surface-border);
+
+  &:last-child { border-bottom: none; }
+}
+
+.info-label {
+  flex: 0 0 150px;
+  font-size: 13px;
+  color: var(--text-color-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+// ---- Empty contracts ----
+.empty-contracts {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--text-color-secondary);
+
+  i { display: block; margin-bottom: 10px; }
+  p  { font-size: 14px; margin: 0; }
+}
+
+// ---- Page loading ----
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+}
+
+// ---- Dialog body ----
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.required { color: var(--red-500); }
+
+.modal-note {
+  font-size: 14px;
+  color: var(--text-color-secondary);
+  margin: 0 0 12px;
+}
+
+.text-danger { color: var(--red-500); }
+
+// ... (giữ nguyên toàn bộ scss cũ, thêm phần dưới)
+
+// ---- Inline edit inputs ----
+.edit-input {
+  width: 100%;
+  height: 34px;
+  font-size: 13px;
+}
+
+:host ::ng-deep .edit-select {
+  width: 100%;
+  .p-select { height: 34px; font-size: 13px; }
+}
+
+:host ::ng-deep .edit-datepicker {
+  width: 100%;
+  .p-datepicker-input { height: 34px; font-size: 13px; }
+}
+
+// Khi đang edit, info-row có thêm khoảng để input không bị chật
+.info-row:has(.edit-input),
+.info-row:has(.edit-select),
+.info-row:has(.edit-datepicker) {
+  padding: 6px 0;
+  align-items: center;
+}

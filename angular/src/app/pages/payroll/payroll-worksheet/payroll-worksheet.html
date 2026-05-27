@@ -1,0 +1,141 @@
+<p-toast position="top-right" />
+<p-confirmDialog />
+
+<div class="ws-layout" [class.ws-layout--panel-open]="showSidePanel()">
+
+  <div class="ws-main">
+
+    <!-- Header -->
+    <div class="lb-header">
+      <div>
+        <h1 class="lb-title">{{ monthName() }}</h1>
+        <p class="lb-subtitle">{{ filtered().length }}/{{ payrolls().length }} nhân viên</p>
+      </div>
+      <div class="lb-header-actions">
+        <p-button
+          label="Chốt bảng lương"
+          icon="pi pi-check-circle"
+          severity="success"
+          [disabled]="!canApproveAll() || isProcessing()"
+          [loading]="isProcessing()"
+          (onClick)="confirmApproveAll()"
+        />
+      </div>
+    </div>
+
+    <!-- Summary widget -->
+    <app-payroll-summary-card
+      [payrolls]="payrolls()"
+      [year]="year()"
+      [month]="month()"
+    />
+
+    <!-- Filter -->
+    <div class="lb-filter" [formGroup]="filterForm">
+      <div class="filter-row">
+        <div class="filter-field filter-field--wide">
+          <label>Tìm kiếm</label>
+          <p-iconfield>
+            <p-inputicon class="pi pi-search" />
+            <input pInputText formControlName="keyword" placeholder="Tên, mã nhân viên..." (input)="applyFilter()" />
+          </p-iconfield>
+        </div>
+        <div class="filter-field">
+          <label>Phòng ban</label>
+          <p-select
+            formControlName="department"
+            [options]="departments"
+            placeholder="Tất cả"
+            [showClear]="true"
+            styleClass="w-full"
+            (onChange)="applyFilter()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="lb-table-wrap">
+      <p-table
+        [value]="filtered()"
+        [loading]="isLoading()"
+        styleClass="p-datatable-sm p-datatable-striped"
+        [scrollable]="true"
+        scrollHeight="calc(100vh - 420px)"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width: 200px">Nhân viên</th>
+            <th style="width: 130px">Phòng ban</th>
+            <th style="width: 130px; text-align: right">Lương cơ bản</th>
+            <th style="width: 120px; text-align: right">Gross</th>
+            <th style="width: 110px; text-align: right">Khấu trừ</th>
+            <th style="width: 110px; text-align: right">Thuế TNCN</th>
+            <th style="width: 130px; text-align: right">Thực nhận</th>
+            <th style="width: 110px; text-align: center">Trạng thái</th>
+            <th style="width: 64px"></th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-p>
+          <tr [class.row--selected]="selectedPayroll()?.id === p.id">
+            <td>
+              <div class="emp-cell" (click)="openSidePanel(p)">
+                <span class="emp-name">{{ p.employeeName }}</span>
+                <span class="emp-code">{{ p.employeeCode }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="dept-text">{{ p.departmentName || '—' }}</span>
+            </td>
+            <td class="text-right mono">{{ fmt(p.baseSalary) }}</td>
+            <td class="text-right mono">{{ fmt(p.grossSalary) }}</td>
+            <td class="text-right mono text-orange-600">{{ fmt(p.totalDeduction) }}</td>
+            <td class="text-right mono text-red-500">{{ fmt(p.pit) }}</td>
+            <td class="text-right mono net-col">{{ fmt(p.netSalary) }}</td>
+            <td class="text-center">
+              <p-tag [value]="getStatusLabel(p.status)" [severity]="getStatusSeverity(p.status)" />
+            </td>
+            <td class="text-center">
+              <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small" (onClick)="menu.toggle($event)" />
+              <p-menu #menu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9">
+              <div class="empty-row">
+                <i class="pi pi-inbox"></i>
+                <p>Không có dữ liệu bảng lương</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+  </div>
+
+  <!-- Side Panel -->
+  <div class="ws-side-panel" *ngIf="showSidePanel()">
+    <app-payroll-detail-side-panel
+      [payroll]="selectedPayroll()!"
+      (close)="closeSidePanel()"
+      (updated)="onPayrollUpdated($event)"
+      (previewPayslip)="openPayslip($event)"
+    />
+  </div>
+
+</div>
+
+<!-- Payslip dialog -->
+<p-dialog
+  header="Phiếu lương"
+  [(visible)]="showPayslip"
+  [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: '680px' }"
+>
+  <app-payslip-preview *ngIf="previewPayroll()" [payroll]="previewPayroll()!" />
+</p-dialog>

@@ -1,0 +1,201 @@
+<p-toast position="top-right" />
+<p-confirmDialog styleClass="leave-confirm-dialog" />
+
+<div class="detail-page" *ngIf="!isLoading && request">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="btn-back" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      Quản lý nghỉ phép
+    </button>
+    <div class="topbar-actions">
+      <ng-container *ngIf="canApproveOrReject()">
+        <button class="btn btn-success" (click)="openApprove()">
+          <i class="fas fa-check"></i>
+          Duyệt
+        </button>
+        <button class="btn btn-danger" (click)="openReject()">
+          <i class="fas fa-times"></i>
+          Từ chối
+        </button>
+      </ng-container>
+      <button class="btn btn-secondary" *ngIf="canCancel()" (click)="confirmCancel()">
+        <i class="fas fa-ban"></i>
+        Hủy đơn
+      </button>
+    </div>
+  </div>
+
+  <!-- Status banner -->
+  <div class="status-banner" [ngClass]="getStatusClass(request.status)">
+    <div class="banner-left">
+      <i class="fas fa-info-circle"></i>
+      Trạng thái đơn:
+      <strong>{{ getStatusLabel(request.status) }}</strong>
+    </div>
+    <span class="banner-id">Mã đơn #{{ request.id }}</span>
+  </div>
+
+  <!-- Content grid -->
+  <div class="detail-grid">
+
+    <!-- Request info -->
+    <div class="detail-card">
+      <div class="card-header"><i class="fas fa-file-alt"></i> Thông tin đơn</div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-label">Loại phép</span>
+          <span class="info-value leave-type">{{ request.leaveTypeName || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Từ ngày</span>
+          <span class="info-value">{{ request.startDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Đến ngày</span>
+          <span class="info-value">{{ request.endDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Số ngày nghỉ</span>
+          <span class="info-value">
+            <span class="days-badge days-badge--lg">{{ request.totalDays || '—' }} ngày</span>
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ngày tạo đơn</span>
+          <span class="info-value">{{ request.creationTime | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-row" *ngIf="request.reason">
+          <span class="info-label">Lý do</span>
+          <span class="info-value">{{ request.reason }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee info -->
+    <div class="detail-card">
+      <div class="card-header"><i class="fas fa-user"></i> Thông tin nhân viên</div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-label">Họ tên</span>
+          <span class="info-value">{{ employeeInfo?.fullName || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Phòng ban</span>
+          <span class="info-value">{{ employeeInfo?.departmentName || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Vị trí</span>
+          <span class="info-value">{{ employeeInfo?.positionTitle || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approval timeline -->
+    <div class="detail-card detail-card--full">
+      <div class="card-header"><i class="fas fa-history"></i> Lịch sử duyệt</div>
+      <div class="card-body" *ngIf="approvalHistory.length > 0; else noHistory">
+        <div class="timeline">
+          <div class="timeline-item" *ngFor="let log of approvalHistory; let last = last">
+            <div class="timeline-dot" [ngClass]="getActionClass(log.action)"></div>
+            <div class="timeline-line" *ngIf="!last"></div>
+            <div class="timeline-content">
+              <div class="timeline-top">
+                <span class="timeline-actor">{{ log.userFullName || log.userName }}</span>
+                <span class="timeline-step">{{ getStepLabel(log.actionStep) }}</span>
+                <span class="timeline-action" [ngClass]="getActionClass(log.action)">
+                  {{ getActionLabel(log.action) }}
+                </span>
+              </div>
+              <div class="timeline-time">{{ log.creationTime | date:'dd/MM/yyyy HH:mm' }}</div>
+              <div class="timeline-comment" *ngIf="log.comment">
+                <i class="fas fa-comment-alt"></i> {{ log.comment }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noHistory>
+        <div class="empty-history">
+          <i class="fas fa-clock"></i>
+          <p>Chưa có lịch sử duyệt</p>
+        </div>
+      </ng-template>
+    </div>
+
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="page-loading" *ngIf="isLoading">
+  <div class="spinner spinner-lg"></div>
+</div>
+
+
+<!-- ===== DIALOG: Approve / Reject ===== -->
+<p-dialog
+  [(visible)]="showApprovalDialog"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '460px' }"
+  [header]="approvalAction === 'approve' ? 'Xác nhận duyệt đơn' : 'Từ chối đơn'"
+  styleClass="approval-dialog"
+  (onHide)="closeApprovalDialog()"
+>
+  <ng-template pTemplate="content">
+    <form [formGroup]="approvalForm" class="approval-form">
+
+      <div class="approval-summary">
+        <div class="summary-row">
+          <span>Nhân viên:</span>
+          <strong>{{ request?.employeeName }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Loại phép:</span>
+          <strong>{{ request?.leaveTypeName }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Thời gian:</span>
+          <strong>{{ request?.startDate | date:'dd/MM/yyyy' }} — {{ request?.endDate | date:'dd/MM/yyyy' }}</strong>
+        </div>
+      </div>
+
+      <div class="field" [class.mt-3]="true">
+        <label class="field-label">
+          Nhận xét
+          <span class="required" *ngIf="commentRequired"> *</span>
+          <span class="optional" *ngIf="!commentRequired"> (không bắt buộc)</span>
+        </label>
+        <textarea
+          pTextarea
+          formControlName="comment"
+          rows="3"
+          [placeholder]="approvalAction === 'reject' ? 'Nhập lý do từ chối...' : 'Nhập nhận xét (nếu có)...'"
+          class="w-full"
+          [ngClass]="{ 'ng-invalid ng-dirty': isCommentInvalid() }"
+          autoResize="true"
+        ></textarea>
+        <small class="field-error" *ngIf="isCommentInvalid()">
+          Vui lòng nhập lý do từ chối
+        </small>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button class="btn btn-secondary" (click)="closeApprovalDialog()">Hủy</button>
+      <button
+        [class]="approvalAction === 'approve' ? 'btn btn-success' : 'btn btn-danger'"
+        (click)="submitApproval()"
+        [disabled]="isSubmitting"
+      >
+        <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+        {{ approvalAction === 'approve' ? 'Xác nhận duyệt' : 'Xác nhận từ chối' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

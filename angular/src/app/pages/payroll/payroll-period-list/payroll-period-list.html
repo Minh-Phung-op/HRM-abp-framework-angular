@@ -1,0 +1,110 @@
+<p-toast position="top-right" />
+
+<div class="lb-page">
+
+    <!-- Header -->
+    <div class="lb-header">
+        <div>
+            <h1 class="lb-title">Quản lý kỳ lương</h1>
+            <p class="lb-subtitle">{{ periods().length }} kỳ lương đã khởi tạo</p>
+        </div>
+        <p-button label="Khởi tạo kỳ lương mới" icon="pi pi-plus" (onClick)="openGenerate()" />
+    </div>
+
+    <!-- Loading skeletons -->
+    <div class="period-grid" *ngIf="isLoading()">
+        <div class="period-card" *ngFor="let i of [1,2,3,4,5,6]">
+            <p-skeleton height="160px" borderRadius="12px" />
+        </div>
+    </div>
+
+    <!-- Empty -->
+    <div class="empty-wrap" *ngIf="!isLoading() && periods().length === 0">
+        <i class="pi pi-calendar-times"></i>
+        <p>Chưa có kỳ lương nào. Nhấn "Khởi tạo kỳ lương mới" để bắt đầu.</p>
+    </div>
+
+    <!-- Period grid -->
+    <div class="period-grid" *ngIf="!isLoading() && periods().length > 0">
+        <div class="period-card" *ngFor="let period of periods()">
+
+            <div class="period-card__top">
+                <div class="period-card__date">
+                    <span class="period-month">Tháng {{ period.month | number:'2.0-0' }}</span>
+                    <span class="period-year">{{ period.year }}</span>
+                </div>
+                <p-tag [value]="getPeriodStatusLabel(period.status)"
+                    [severity]="getPeriodStatusSeverity(period.status)" />
+            </div>
+
+            <div class="period-card__stats">
+                <div class="stat-item">
+                    <span class="stat-label">Nhân viên</span>
+                    <span class="stat-value">{{ period.approvedCount }}/{{ period.totalCount }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Đã thanh toán</span>
+                    <span class="stat-value stat-value--green">{{ period.paidCount }}</span>
+                </div>
+                <div class="stat-item stat-item--wide">
+                    <span class="stat-label">Tổng quỹ lương</span>
+                    <span class="stat-value stat-value--primary">{{ formatCurrency(period.totalNet) }}</span>
+                </div>
+            </div>
+
+            <div class="period-card__progress">
+                <div class="progress-header">
+                    <span class="progress-label-text">Tiến độ duyệt</span>
+                    <span class="progress-pct">{{ getProgressValue(period) }}%</span>
+                </div>
+                <p-progressbar [value]="getProgressValue(period)" [style]="{ height: '6px' }" [showValue]="false" />
+            </div>
+
+            <div class="period-card__footer">
+                <p-button label="Vào chi tiết" icon="pi pi-arrow-right" iconPos="right" [outlined]="true" size="small"
+                    styleClass="w-full" (onClick)="goToWorksheet(period)" />
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Dialog: Generate -->
+<p-dialog header="Khởi tạo kỳ lương mới" [(visible)]="showGenerateDialog" [modal]="true" [draggable]="false"
+    [resizable]="false" [style]="{ width: '440px' }" (onHide)="closeGenerate()">
+    <div [formGroup]="generateForm" class="form-grid-single">
+
+        <div class="form-field">
+            <label class="form-label">Năm <span class="required">*</span></label>
+            <p-select formControlName="year" [options]="yearOptions" optionLabel="label" optionValue="value"
+                styleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('year') }" />
+            <small class="p-error" *ngIf="isInvalid('year')">{{ getError('year') }}</small>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Tháng <span class="required">*</span></label>
+            <p-select formControlName="month" [options]="monthOptions" optionLabel="label" optionValue="value"
+                styleClass="w-full" [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('month') }" />
+            <small class="p-error" *ngIf="isInvalid('month')">{{ getError('month') }}</small>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Phòng ban <span class="form-hint-inline">(để trống = toàn bộ)</span></label>
+            <p-select formControlName="departmentId" [options]="departmentOptions()" optionLabel="name" optionValue="id"
+                placeholder="Chọn phòng ban (hoặc để trống)" [showClear]="true" styleClass="w-full" appendTo="body" />
+        </div>
+
+        <div class="generate-note">
+            <i class="pi pi-info-circle"></i>
+            Hệ thống sẽ tự động tạo bản lương cho toàn bộ nhân viên đang làm việc
+            trong kỳ đã chọn.
+        </div>
+
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Hủy" severity="secondary" [text]="true" (onClick)="closeGenerate()" />
+        <p-button label="Khởi tạo" icon="pi pi-bolt" [loading]="isGenerating()" (onClick)="submitGenerate()" />
+    </ng-template>
+</p-dialog>

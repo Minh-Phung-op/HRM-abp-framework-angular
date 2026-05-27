@@ -1,0 +1,250 @@
+.payslip {
+    padding: 8px 4px;
+    font-size: 13px;
+    color: #1e293b;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 4px;
+    }
+
+    &__company {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__logo {
+        width: 44px;
+        height: 44px;
+        background: var(--p-primary-color);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    &__company-name {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--p-text-color);
+    }
+
+    &__company-sub {
+        font-size: 12px;
+        color: var(--p-text-muted-color);
+        margin-top: 2px;
+    }
+
+    &__title-block {
+        text-align: right;
+    }
+
+    &__title {
+        font-size: 18px;
+        font-weight: 900;
+        color: var(--p-primary-color);
+        letter-spacing: 0.05em;
+    }
+
+    &__period {
+        font-size: 13px;
+        color: var(--p-text-muted-color);
+        margin-top: 2px;
+    }
+
+    &__emp-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 24px;
+        margin: 4px 0;
+    }
+
+    &__columns {
+        display: flex;
+        gap: 0;
+    }
+
+    &__col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 4px 0;
+    }
+
+    &__net {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 4px;
+        gap: 16px;
+    }
+}
+
+.info-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.info-key {
+    font-size: 11px;
+    color: var(--p-text-muted-color);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.info-val {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--p-text-color);
+}
+
+.columns-divider {
+    width: 1px;
+    background: var(--p-content-border-color);
+    margin: 0 20px;
+    flex-shrink: 0;
+}
+
+.col-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--p-content-border-color);
+    margin-bottom: 2px;
+
+    &--income {
+        color: var(--p-green-600, #16a34a);
+    }
+
+    &--deduction {
+        color: var(--p-red-500, #ef4444);
+    }
+}
+
+.col-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--p-text-color);
+    padding: 2px 0;
+
+    &--total {
+        border-top: 1px dashed var(--p-content-border-color);
+        padding-top: 6px;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+}
+
+.col-section {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.col-section-label {
+    font-size: 11px;
+    color: var(--p-text-muted-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+}
+
+.text-green {
+    color: var(--p-green-600, #16a34a);
+    font-weight: 600;
+}
+
+.text-red {
+    color: var(--p-red-500, #ef4444);
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.net-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--p-text-muted-color);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.net-value {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--p-primary-color);
+}
+
+.footer-sig {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sig-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--p-text-muted-color);
+    text-transform: uppercase;
+}
+
+.sig-line {
+    width: 80%;
+    height: 1px;
+    border-bottom: 1px dashed #94a3b8;
+    margin-top: 40px;
+}
+
+.sig-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--p-text-color);
+}
+
+.payslip-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 16px;
+}
+
+// ---- Print styles ----
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .payslip {
+        padding: 0;
+        color: #000;
+    }
+}

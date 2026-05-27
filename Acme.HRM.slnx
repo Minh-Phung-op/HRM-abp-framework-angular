@@ -1,0 +1,23 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU" />
+    </Configurations>
+    <Folder Name="/src/">
+        <Project Path="src/Acme.HRM.Domain/Acme.HRM.Domain.csproj" />
+        <Project Path="src/Acme.HRM.Application/Acme.HRM.Application.csproj" />
+        <Project Path="src/Acme.HRM.EntityFrameworkCore/Acme.HRM.EntityFrameworkCore.csproj" />
+        <Project Path="src/Acme.HRM.Domain.Shared/Acme.HRM.Domain.Shared.csproj" />
+        <Project Path="src/Acme.HRM.Application.Contracts/Acme.HRM.Application.Contracts.csproj" />
+        <Project Path="src/Acme.HRM.HttpApi/Acme.HRM.HttpApi.csproj" />
+        <Project Path="src/Acme.HRM.HttpApi.Client/Acme.HRM.HttpApi.Client.csproj" />
+        <Project Path="src/Acme.HRM.HttpApi.Host/Acme.HRM.HttpApi.Host.csproj" />
+        <Project Path="src/Acme.HRM.DbMigrator/Acme.HRM.DbMigrator.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/Acme.HRM.Application.Tests/Acme.HRM.Application.Tests.csproj" />
+        <Project Path="test/Acme.HRM.EntityFrameworkCore.Tests/Acme.HRM.EntityFrameworkCore.Tests.csproj" />
+        <Project Path="test/Acme.HRM.TestBase/Acme.HRM.TestBase.csproj" />
+        <Project Path="test/Acme.HRM.Domain.Tests/Acme.HRM.Domain.Tests.csproj" />
+        <Project Path="test/Acme.HRM.HttpApi.Client.ConsoleTestApp/Acme.HRM.HttpApi.Client.ConsoleTestApp.csproj" />
+    </Folder>
+</Solution>

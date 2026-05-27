@@ -1,0 +1,478 @@
+// ---- Page shell ----
+.att-page {
+    padding: 24px 32px;
+    min-height: 100vh;
+}
+
+.lb-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 2px;
+    color: var(--p-text-color);
+}
+
+.lb-subtitle {
+    font-size: 13px;
+    color: var(--p-text-muted-color);
+    margin: 0;
+}
+
+// ---- Top bar ----
+.att-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.lb-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.month-nav {
+    display: flex;
+    gap: 8px;
+}
+
+:host ::ng-deep .nav-select {
+    .p-select {
+        min-width: 110px;
+    }
+}
+
+// ---- Check-in widget ----
+.checkin-widget {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 14px;
+    padding: 0;
+    margin-bottom: 16px;
+    overflow: hidden;
+
+    &__clock {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 18px 28px;
+        background: var(--p-primary-color);
+        color: #fff;
+        flex-shrink: 0;
+
+        i {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+    }
+
+    &__divider {
+        width: 1px;
+        background: var(--p-content-border-color);
+        align-self: stretch;
+        flex-shrink: 0;
+    }
+
+    &__actions {
+        display: flex;
+        gap: 12px;
+        padding: 18px 24px;
+        flex-shrink: 0;
+    }
+
+    &__status {
+        display: flex;
+        gap: 24px;
+        padding: 18px 24px;
+        flex: 1;
+    }
+}
+
+.clock-display {
+    font-size: 28px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: #fff;
+}
+
+.clock-date {
+    font-size: 12px;
+    opacity: 0.75;
+    text-transform: capitalize;
+}
+
+.status-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &__label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--p-text-muted-color);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        i {
+            font-size: 11px;
+        }
+    }
+
+    &__value {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--p-text-muted-color);
+
+        &--set {
+            color: var(--p-primary-color);
+        }
+    }
+}
+
+// ---- Filter bar ----
+.att-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--p-text-muted-color);
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot--present {
+    background: #22c55e;
+}
+
+.dot--late {
+    background: #f97316;
+}
+
+.dot--absent {
+    background: #ef4444;
+}
+
+.dot--onleave {
+    background: #3b82f6;
+}
+
+.dot--halfday {
+    background: #a855f7;
+}
+
+// ---- Grid wrap ----
+.grid-wrap {
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 12px;
+    overflow: auto;
+}
+
+.att-grid {
+    min-width: max-content;
+}
+
+// ---- Grid row layout ----
+.grid-header,
+.grid-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--p-content-border-color);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.grid-header {
+    background: var(--p-surface-50, #f9fafb);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.grid-row:hover {
+    background: var(--p-surface-50, #f9fafb);
+}
+
+// ---- Employee column ----
+.cell-emp {
+    width: 180px;
+    min-width: 180px;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    border-right: 2px solid var(--p-content-border-color);
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 5;
+
+    &--header {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--p-text-muted-color);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        justify-content: center;
+        background: var(--p-surface-50, #f9fafb);
+    }
+}
+
+.emp-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--p-text-color);
+}
+
+.emp-code {
+    font-size: 11px;
+    color: var(--p-text-muted-color);
+}
+
+// ---- Day cells ----
+.cell-day--header {
+    width: 38px;
+    min-width: 38px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 2px;
+    border-right: 1px solid var(--p-content-border-color);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--p-text-muted-color);
+
+    &.cell-day--weekend {
+        background: var(--p-surface-100, #f1f5f9);
+        color: var(--p-red-400, #f87171);
+    }
+
+    &.cell-day--today {
+        background: var(--p-primary-50, #eff6ff);
+        color: var(--p-primary-color);
+    }
+}
+
+.day-num {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.day-wday {
+    font-size: 10px;
+    font-weight: 500;
+    margin-top: 1px;
+}
+
+// ---- Attendance cells ----
+.cell {
+    width: 38px;
+    min-width: 38px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--p-content-border-color);
+    cursor: pointer;
+    position: relative;
+    transition: filter 0.12s;
+    gap: 1px;
+
+    &:hover {
+        filter: brightness(0.92);
+    }
+
+    &--empty {
+        background: transparent;
+        cursor: pointer;
+
+        &:hover {
+            background: var(--p-primary-50, #eff6ff);
+        }
+    }
+
+    &--weekend {
+        background: var(--p-surface-100, #f1f5f9);
+        cursor: default;
+
+        &:hover {
+            filter: none;
+        }
+    }
+
+    &--present {
+        background: #dcfce7;
+    }
+
+    &--late {
+        background: #fff7ed;
+    }
+
+    &--early {
+        background: #fef9c3;
+    }
+
+    &--absent {
+        background: #fee2e2;
+    }
+
+    &--halfday {
+        background: #f3e8ff;
+    }
+
+    &--onleave {
+        background: #dbeafe;
+    }
+
+    &--locked {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    &.cell-day--today {
+        outline: 2px solid var(--p-primary-color);
+        outline-offset: -2px;
+    }
+}
+
+.cell-symbol {
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.cell--present .cell-symbol {
+    color: #16a34a;
+}
+
+.cell--late .cell-symbol {
+    color: #ea580c;
+}
+
+.cell--early .cell-symbol {
+    color: #ca8a04;
+}
+
+.cell--absent .cell-symbol {
+    color: #dc2626;
+}
+
+.cell--halfday .cell-symbol {
+    color: #9333ea;
+}
+
+.cell--onleave .cell-symbol {
+    color: #2563eb;
+}
+
+.cell-lock-icon {
+    font-size: 8px;
+    color: var(--p-text-muted-color);
+    opacity: 0.7;
+}
+
+// ---- Total column ----
+.cell-total {
+    width: 80px;
+    min-width: 80px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 8px;
+    border-left: 2px solid var(--p-content-border-color);
+    gap: 1px;
+
+    &--header {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--p-text-muted-color);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+}
+
+.total-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--p-primary-color);
+    line-height: 1;
+}
+
+.total-label {
+    font-size: 11px;
+    color: var(--p-text-muted-color);
+}
+
+// ---- Skeleton ----
+.grid-skeleton {
+    padding: 16px;
+}
+
+// ---- Dialog form ----
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding-top: 8px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    &--full {
+        grid-column: 1 / -1;
+    }
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--p-text-color);
+}
+
+.required {
+    color: var(--p-red-500, #ef4444);
+}

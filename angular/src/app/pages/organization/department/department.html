@@ -1,0 +1,95 @@
+<div class="card p-4">
+    <div class="flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-2xl font-bold m-0">Quản lý {{ title }}</h1>
+            <span class="text-gray-500">{{ totalCount }} bản ghi</span>
+        </div>
+        <p-button label="Thêm mới" icon="pi pi-plus" (onClick)="openCreate()"></p-button>
+    </div>
+
+    <p-table [value]="departments" [lazy]="true" (onLazyLoad)="loadDepartments($event)" [paginator]="true" [rows]="10"
+        [totalRecords]="totalCount" [loading]="isLoading" [rowHover]="true" responsiveLayout="scroll"
+        styleClass="p-datatable-striped p-datatable-gridlines">
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="name">Tên <p-sortIcon field="name"></p-sortIcon></th>
+                <th>Mã/Cấp bậc</th>
+                <th>Phòng ban</th>
+                <th>Trạng thái</th>
+                <th style="width: 5rem"></th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item>
+            <tr>
+                <td class="font-bold">{{ item.name || item.title }}</td>
+                <td>
+                    <span class="p-tag p-tag-info">{{ item.code || item.level || '—' }}</span>
+                </td>
+                <td>{{ item.parentName || item.departmentName || '—' }}</td>
+                <td>
+                    <span [class]="'active-badge ' + (item.isActive ? 'active-badge--on' : 'active-badge--off')">
+                        <span class="dot"></span>
+                        {{ item.isActive ? 'Đang hoạt động' : 'Tạm dừng' }}
+                    </span>
+                </td>
+                <td>
+                    <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary"
+                        (onClick)="menu.toggle($event)"></p-button>
+                    <p-menu #menu [popup]="true" [model]="getMenuItems(item)" appendTo="body"></p-menu>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog [(visible)]="showFormModal" [header]="isEditMode ? 'Chỉnh sửa' : 'Tạo mới'" [modal]="true"
+    [style]="{width: '450px'}" class="p-fluid">
+
+    <ng-template pTemplate="content">
+        <div [formGroup]="departmentForm" class="flex flex-column gap-4 mt-2">
+
+            <div class="flex flex-column  justify-content-center gap-2">
+                <label class="font-bold">Tên <span class="text-red-500">*</span></label>
+                <input pInputText formControlName="name" 
+                    [class.ng-invalid]="departmentForm.get('name')?.invalid && departmentForm.get('name')?.touched"
+                    placeholder="Nhập tên phòng ban" />
+                <small class="text-red-500" *ngIf="departmentForm.get('name')?.invalid && departmentForm.get('name')?.touched">
+                    Tên phòng ban là bắt buộc.
+                </small>
+            </div>
+
+            <div class="flex flex-column gap-2">
+                <label class="font-bold">Code <span class="text-red-500">*</span></label>
+                <input pInputText formControlName="code" 
+                    [class.ng-invalid]="departmentForm.get('code')?.invalid && departmentForm.get('code')?.touched"
+                    placeholder="VD: DEPT-001" />
+                <small class="text-red-500" *ngIf="departmentForm.get('code')?.invalid && departmentForm.get('code')?.touched">
+                    Mã phòng ban là bắt buộc.
+                </small>
+            </div>
+
+            <div class="flex flex-column gap-2">
+                <label class="font-bold">Phòng ban cấp trên</label>
+                <p-select [options]="departments" formControlName="parentId" optionLabel="name" optionValue="id"
+                    [showClear]="true" placeholder="Chọn phòng ban cha" class="w-full">
+                </p-select>
+            </div>
+
+            <div class="flex align-items-center gap-2">
+                <p-toggleswitch formControlName="isActive"></p-toggleswitch>
+                <label class="font-medium">Kích hoạt hoạt động</label>
+            </div>
+
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Hủy" icon="pi pi-times" [text]="true" severity="secondary"
+            (onClick)="showFormModal = false"></p-button>
+        <p-button label="Lưu" icon="pi pi-check" (onClick)="submitForm()" [loading]="isSubmitting"
+            [disabled]="departmentForm.invalid"></p-button>
+    </ng-template>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>
